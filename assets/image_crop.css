@@ -1,0 +1,121 @@
+.image-wrap{
+	overflow:hidden;
+	position:relative;
+	float:left;
+	width:70%;
+	max-width: 1000px;
+	max-height: 700px;
+}
+
+.image-wrap>img{
+	//position:absolute;
+	width: 100%;
+	float:left;
+}
+
+.image-wrap .grid{
+	position:absolute;
+	top:0;
+	left:0;
+	right:0;
+	bottom:0;
+}
+.image-wrap .row{
+	height:33.33%;
+	box-sizing:border-box;
+}
+.image-wrap .col{
+	width:33.33%;
+	height:100%;
+	float:left;
+	border:solid 1px #333;
+	cursor:pointer;
+	box-sizing:border-box;
+}
+.image-wrap .col:hover{
+	background:rgba(0,0,0,0.3);
+}
+.image-wrap .col.active{
+	background:rgba(255,255,255,0.3);
+}
+.image-preview-container {
+	float:right;
+}
+.image-preview-container > div{
+	margin:10px;
+}
+.landscape-preview{
+	width:200px;
+	height:75px;
+	overflow: hidden;
+	position:relative;
+	border: solid 1px black;
+}
+.landscape-preview img{
+	transition: all 0.2s ease-in-out;
+	width:100%;
+	position:absolute;
+}
+.portrait-preview{
+	width:200px;
+	height:275px;
+	overflow: hidden;
+	position:relative;
+	border: solid 1px black;
+}
+.portrait-preview img{
+	transition: all 0.2s ease-in-out;
+	height:100%;
+	position:absolute;
+}
+
+.landscape-preview .crop-top {
+	top:0;
+}
+
+.landscape-preview .crop-bottom {
+	bottom:0;
+	top:auto;
+}
+
+.landscape-preview .crop-middle {
+	top:50%;
+	left:0;
+	-webkit-transform: translateY(-50%);
+	-moz-transform: translateY(-50%);
+	-ms-transform: translateY(-50%);
+	-o-transform: translateY(-50%);
+	transform: translateY(-50%);
+}
+
+.portrait-preview .crop-right {
+	position:absolute;
+	top:0;
+	right:0;
+}
+
+.portrait-preview .crop-center {
+	-webkit-transform: translateY(-50%) translateX(-50%);
+	-moz-transform: translateY(-50%) translateX(-50%);
+	-ms-transform: translateY(-50%) translateX(-50%);
+	-o-transform: translateY(-50%) translateX(-50%);
+	transform: translateY(-50%) translateX(-50%);
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	right: 0;
+}
+
+#crop-canvas{
+	display: none;
+}
+
+.dropzone-container{
+	background: rgba(0,0,0,0.1);
+	padding:20px;
+	margin-bottom: 20px;
+}
+
+.image-crop-container{
+	/*min-height: 500px;*/
+}

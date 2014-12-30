@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension id="s3_image_upload" status="released" xmlns="http://symphony-cms.com/schemas/extension/1.0">
+	<name>Field: S3 Image Upload</name>
+	<description>S3 Image Uploads, with cropping and resizing functionality.</description>
+	<repo type="github">https://github.com/jonmifsud/s3_image_upload</repo>
+	<types>
+		<type>Field</type>
+		<type>Workflow</type>
+		<type>Multimedia</type>
+		<type>Image</type>
+		<type>Thumbnail</type>
+	</types>
+	<authors>
+		<author>
+			<name github="jonmifsud" symphony="gunglien">Jonathan Mifsud</name>
+			<email>info@jonmifsud.com</email>
+			<website>http://jonmifsud.com</website>
+		</author>
+	</authors>
+	<dependencies>
+		<dependency version="1.31">jit_image_manipulation</dependency>
+	</dependencies>
+	<releases>
+		<release version="1" date="2014-12-30" min="2.5">
+			- Initial Version
+			- UI showing large preview image and resized images
+			- ability to change the resized images without re-uploading original
+			- cropped images provided via field config are uploaded directly to s3 buckets
+			- uses JIT formatters for uploading
+		</release>
+	</releases>
+</extension>
