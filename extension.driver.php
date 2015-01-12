@@ -22,10 +22,10 @@
 			$group->appendChild(new XMLElement('legend', 'Amazon S3 Security Credentials'));
 			$div = new XMLElement('div', NULL, array('class' => 'group'));
 			$label = Widget::Label('Access Key ID');
-			$label->appendChild(Widget::Input('settings[s3upload_field][access-key-id]', General::Sanitize($this->getAmazonS3AccessKeyId())));
+			$label->appendChild(Widget::Input('settings[s3_image_upload][access-key-id]', General::Sanitize($this->getAmazonS3AccessKeyId())));
 			$div->appendChild($label);
 			$label = Widget::Label('Secret Access Key');
-			$label->appendChild(Widget::Input('settings[s3upload_field][secret-access-key]', General::Sanitize($this->getAmazonS3SecretAccessKey()), 'password'));
+			$label->appendChild(Widget::Input('settings[s3_image_upload][secret-access-key]', General::Sanitize($this->getAmazonS3SecretAccessKey()), 'password'));
 			$div->appendChild($label);
 			$group->appendChild($div);
 			$group->appendChild(new XMLElement('p', 'Get a Access Key ID and Secret Access Key from the <a href="http://aws.amazon.com">Amazon Web Services site</a>.', array('class' => 'help')));
