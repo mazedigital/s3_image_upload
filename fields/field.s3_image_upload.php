@@ -648,7 +648,7 @@
 				$originalImgName = $this->getOriginalImgName($data['filename']);
 				$style = "left:{$cropData[0]}%;top:{$cropData[1]}%;width:{$cropData[2]}%;height:{$cropData[3]}%;";
 				$html = "<div class='image-wrap'>".
-				  "<img id='source-img' src='". $this->s3Client->getObjectUrl($this->get('bucket'), $originalImgName) ."'>".
+				  "<img id='source-img' src='". $this->s3Client->getObjectUrl($this->get('bucket'), $originalImgName) ."' crossOrigin='crossOrigin' />".
 				  "<div class='grid' style='". $style ."'>".
 				    "<div class='row' data-row='1'>".
 				      "<div class='col' data-pos='crop-left crop-top' data-jit='1'></div>".
@@ -684,6 +684,7 @@
 	            $wrapper->appendChild(Widget::Error($imagePreviewContainer, $flagWithError));
 	        } else {
 	            $wrapper->appendChild($imagePreviewContainer);
+	            $wrapper->appendChild(new XMLElement('div', NULL, array('style' => 'clear:both;')));
 	        }
 
 			//TEMP previews - these should have pre-set width/height attributes generated from the field settings
@@ -785,8 +786,8 @@
 							'imagename' => basename($data),
 							'left' => 0,
 							'top' => 0,
-							'right' => 0,
-							'bottom' => 0,
+							'width' => 100,
+							'height' => 100,
 							'crop_position' => "crop-center crop-middle",
 						);
 					return $newData;
