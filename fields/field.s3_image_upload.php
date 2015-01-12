@@ -8,7 +8,7 @@
 	use Aws\S3\S3Client;
 	use Aws\S3\Exception\S3Exception;
 
-	Class fieldS3_Image_Upload extends Field {
+	Class fieldS3_Image_Upload extends Field  implements ImportableField { //ExportableField, 
 
 		const CROPPED = 0;
 		const WIDTH = 1;
@@ -463,27 +463,6 @@
 			// get current section id
 			$section_id = Administration::instance()->Page->_context[1];
 
-			// related field
-			$label = Widget::Label(__('Related upload field'), NULL);
-			$fields = FieldManager::fetch(NULL, $section_id, 'ASC', 'sortorder', NULL, NULL, sprintf("AND (type IN ('%s'))", implode("', '", $this->supported_upload_fields)));
-			$options = array(
-				array('', false, __('None Selected'), ''),
-			);
-			$attributes = array(
-				array()
-			);
-			if(is_array($fields) && !empty($fields)) {
-				foreach($fields as $field) {
-					$options[] = array($field->get('id'), ($field->get('id') == $this->get('related_field_id')), $field->get('label'));
-				}
-			};
-			$label->appendChild(Widget::Select('fields['.$this->get('sortorder').'][related_field_id]', $options));
-			if(isset($errors['related_field_id'])) {
-				$wrapper->appendChild(Widget::wrapFormElementWithError($label, $errors['related_field_id']));
-			} else {
-				$wrapper->appendChild($label);
-			};
-
 			// ratios
 			$label = Widget::Label(__('Crop Dimensions <i>Optional</i>'));
 			$label->appendChild(Widget::Input('fields['.$this->get('sortorder').'][crop_dimensions]', $this->get('crop_dimensions')));
@@ -768,5 +747,56 @@
 			$wrapper->appendChild($element);
 
 		}
+
+		/*-------------------------------------------------------------------------
+			Import:
+		-------------------------------------------------------------------------*/
+
+			public function getImportModes() {
+				return array(
+					'getValue' =>		ImportableField::STRING_VALUE,
+					'getPostdata' =>	ImportableField::ARRAY_VALUE
+				);
+			}
+
+			public function prepareImportValue($data, $mode, $entry_id = null) {
+				$message = $status = null;
+				$modes = (object)$this->getImportModes();
+
+
+				if($mode === $modes->getValue) {
+
+					$type = pathinfo($path, PATHINFO_EXTENSION);
+					$gateway = new Gateway;
+					$gateway->init($data);
+					$result = $gateway->exec();
+					$info = $gateway->getInfoLast();
+					if ($info['http_code'] != 200){
+						return null; //image does not exist
+					}
+					// var_dump(basename($data));die;
+					// var_dump($info);
+					// var_dump($result);die;
+
+					$base64 = 'data:' . $info['content_type'] . ';base64,' . base64_encode($result);
+					//create new data array
+					$newData = array(
+							'image' => $base64,
+							'imagename' => basename($data),
+							'left' => 0,
+							'top' => 0,
+							'right' => 0,
+							'bottom' => 0,
+							'crop_position' => "crop-center crop-middle",
+						);
+					return $newData;
+				}
+				else if($mode === $modes->getPostdata) {
+					return $this->processRawFieldData($data, $status, $message, true, $entry_id);
+				}
+
+				return null;
+			}
+
 
 	}
