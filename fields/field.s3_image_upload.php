@@ -710,7 +710,7 @@
 			if($link){
 				$link->setValue($image);
 				return $link->generate();
-			}
+			} else return $image;
 
 		}
 
