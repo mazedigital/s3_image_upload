@@ -74,7 +74,7 @@ CanvasRenderingContext2D.prototype.clear =
 	        $frame.data( 'left',parseFloat($frame.css('left')) * 100 / $frame.parent().width() );
 	        $frame.data( 'top',parseFloat($frame.css('top')) * 100 / $frame.parent().height() );
 
-	        var fieldPrefix = $('.field-imagecropper').data('field-name');
+	        var fieldPrefix = $('.field-s3_image_upload').data('field-name');
 
 	        $('input[name="'+fieldPrefix+'[top]"]').val($frame.data('top'));
 	        $('input[name="'+fieldPrefix+'[left]"]').val($frame.data('left'));
@@ -142,7 +142,7 @@ CanvasRenderingContext2D.prototype.clear =
 			}
 	    });
 
-		var fieldPrefix = $('.field-imagecropper').data('field-name');
+		var fieldPrefix = $('.field-s3_image_upload').data('field-name');
 
 
 	    if ($('#source-img').length > 0){
@@ -226,9 +226,16 @@ CanvasRenderingContext2D.prototype.clear =
 			$('.grid').height(height);
 			$('.grid').width(width);
 
-	        var fieldPrefix = $('.field-imagecropper').data('field-name');
+	        var fieldPrefix = $('.field-s3_image_upload').data('field-name');
 	        $('input[name="'+fieldPrefix+'[image]"]').val($('#source-img').attr('src'));
 	        $('input[name="'+fieldPrefix+'[imagename]"]').val(file.name);
+
+	        //center crop by default
+	        var selected = 'crop-center crop-middle';
+	        $(' .col.active').removeClass('active');
+	        $(' .col[data-pos="'+ selected +'"]').addClass('active');
+			$('.image-preview-container img').removeClass().addClass(selected)
+			$('input[name="'+fieldPrefix+'[crop_position]').val(selected);
 		});
 
 		myDropzone.on("success", function(file) {

@@ -293,6 +293,7 @@
 			try {
 			    $this->s3Client->upload($this->get('bucket'), $this->filenamePrefix($filename,$dst_w.'x'.$dst_h), $image->getStream(), 'public-read');
 			} catch (S3Exception $e) {
+    			echo 'Caught exception: ',  $e->getMessage(), "\n";die;
 			    echo "There was an error uploading the file.\n";
 			}
 		}
@@ -399,12 +400,7 @@
 
 			// No file given, save empty data:
 			if ($data === null) {
-				return array(
-					'file' =>	   null,
-					'mimetype' =>   null,
-					'size' =>	   null,
-					'meta' =>	   null
-				);
+				return null;
 			}
 
 			if (!empty($data['image'])){
