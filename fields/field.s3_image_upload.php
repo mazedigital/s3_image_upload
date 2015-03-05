@@ -277,7 +277,21 @@
 			$src_h = $image->Meta()->height;
 
 			$src_r = ($src_w / $src_h);
-			$dst_r = ($dst_w / $dst_h);
+
+			if ($dst_h == 0){
+				$dst_r = $src_r;
+				$dst_h = $dst_w / $dst_r;
+			} else if ($dst_w == 0){
+				$dst_r = $src_r;
+				$dst_w = $dst_h * $dst_r;
+			} else {
+				$dst_r = ($dst_w / $dst_h);
+			}
+
+			if ( $dst_w > $src_w || $dst_h > $src_h ){
+				//the image is smaller than the wanted size, do not try to generate the resized image.
+				return false;
+			}
 
 			//first resize
 			if($src_r < $dst_r) {
@@ -292,6 +306,7 @@
 
 			try {
 			    $this->s3Client->upload($this->get('bucket'), $this->filenamePrefix($filename,$dst_w.'x'.$dst_h), $image->getStream(), 'public-read');
+			    return true;
 			} catch (S3Exception $e) {
     			echo 'Caught exception: ',  $e->getMessage(), "\n";die;
 			    echo "There was an error uploading the file.\n";
@@ -299,7 +314,7 @@
 		}
 
 
-		private function cropImage($data,$filename){
+		private function cropImage(&$data,$filename){
 			//crop image to dimensions given by the field
 			$this->image->cropToDimensions($data['left'],$data['top'],$data['width'],$data['height']);
 
@@ -343,8 +358,14 @@
 
 			//for each listed dimension uploaded the resized images
 			foreach ($cropDimensions as $key => $dimensions) {
-				$dimensions = explode('x', $dimensions);
-				$this->uploadResized($dimensions[0],$dimensions[1],$jit_position,$filename);
+				$dimension = explode('x', $dimensions);
+				$result = $this->uploadResized($dimension[0],$dimension[1],$jit_position,$filename);
+				if ($result){
+					if (empty($data['crop_dimensions']))
+						$data['crop_dimensions'] = $dimensions;
+					else 
+						$data['crop_dimensions'] .= ',' . $dimensions;
+				}
 			}
 		}
 
@@ -381,16 +402,16 @@
 				echo "There was an error uploading the file.\n";
 			}
 
+			$this->cropImage($data,$filename);
+
 			$toSave = array(
 					'width' => $this->image->Meta()->width,
 					'height' => $this->image->Meta()->height,
 					'filename' => $filename,
 					'crop_instructions' => implode(',', array($data['left'],$data['top'],$data['width'],$data['height'])),
-					'supported_dimensions' => $this->get('crop_dimensions'),
+					'supported_dimensions' => $data['crop_dimensions'],
 					'crop_position' => $data['crop_position'],
 				);
-
-			$this->cropImage($data,$filename);
 			
 			return $toSave;
 		}
@@ -521,6 +542,17 @@
 			$wrapper->appendChild($help);
 
 			$column = new XMLElement('div', NULL, array('class' => 'two columns'));
+
+			$label = Widget::Label(__('Show Cropping UI'));
+			$label->addClass('column');
+			$column->appendChild($label);
+			$input = Widget::Input('fields['.$this->get('sortorder').'][crop_ui]', 'yes', 'checkbox');
+			$label->prependChild($input);
+
+			if($this->get('crop_ui') == 'yes') {
+				$input->setAttribute('checked', 'checked');
+			}
+
 			$this->appendShowColumnCheckbox($column);
 			$wrapper->appendChild($column);
 		}
@@ -554,12 +586,15 @@
 				'key_prefix',
 				'crop_dimensions',
 				'min_width',
-				'min_height'
+				'min_height',
+				'crop_ui'
 			);
 			foreach ($all_fields as $field) {
 				$value = $this->get($field);
 				if (!empty($value)) {
 					$fields[$field] = $value;
+				} else {
+					if ($field == 'crop_ui') $fields[$field] = 'no';
 				}
 			}
 
@@ -617,15 +652,15 @@
 			// var_dump($cropData);die;
 
 			// hidden inputs
-			$left = Widget::Input($fieldname.'[left]', $cropData[0], 'hidden');
+			$left = Widget::Input($fieldname.'[left]', ($cropData[0] ?: '0'), 'hidden');
 			$label->appendChild($left);
-			$top = Widget::Input($fieldname.'[top]', $cropData[1], 'hidden');
+			$top = Widget::Input($fieldname.'[top]', ($cropData[1] ?: '0'), 'hidden');
 			$label->appendChild($top);
-			$width = Widget::Input($fieldname.'[width]', $cropData[2], 'hidden');
+			$width = Widget::Input($fieldname.'[width]', ($cropData[2] ?: '100'), 'hidden');
 			$label->appendChild($width);
-			$height = Widget::Input($fieldname.'[height]', $cropData[3], 'hidden');
+			$height = Widget::Input($fieldname.'[height]', ($cropData[3] ?: '100'), 'hidden');
 			$label->appendChild($height);
-			$cropPosition = Widget::Input($fieldname.'[crop_position]', $data['crop_position'], 'hidden');
+			$cropPosition = Widget::Input($fieldname.'[crop_position]', ($data['crop_position'] ?: 'crop-center crop-middle'), 'hidden');
 			$label->appendChild($cropPosition);
 			$image = Widget::Input($fieldname.'[image]', null, 'hidden');
 			$label->appendChild($image);
@@ -637,58 +672,69 @@
 			// var_dump($data);die;
 
 			// main upload and cropping container
-			$dropzoneContainer = new XMLElement('div', "Drop images or click to upload", array('class' => 'dropzone-container'));
+			$dropzoneContainer = new XMLElement('div', "Drop images or click to upload", array('class' => 'dropzone-container','data-crop-ui' => $this->get('crop_ui')));
 			$wrapper->appendChild($dropzoneContainer);
-			if ($data['crop_instructions']){
-				$imgsrc = $this->s3Client->getObjectUrl($this->get('bucket'),  $this->filenamePrefix($data['filename'],'cropped'));
-				$originalImgName = $this->getOriginalImgName($data['filename']);
-				$style = "left:{$cropData[0]}%;top:{$cropData[1]}%;width:{$cropData[2]}%;height:{$cropData[3]}%;";
-				$html = "<div class='image-wrap'>".
-				  "<img id='source-img' src='". $this->s3Client->getObjectUrl($this->get('bucket'), $originalImgName) ."' crossOrigin='crossOrigin' />".
-				  "<div class='grid' style='". $style ."'>".
-				    "<div class='row' data-row='1'>".
-				      "<div class='col' data-pos='crop-left crop-top' data-jit='1'></div>".
-				      "<div class='col' data-pos='crop-center crop-top' data-jit='2'></div>".
-				      "<div class='col' data-pos='crop-right crop-top' data-jit='3'></div>".
-				    "</div>".
-				    "<div class='row' data-row='2'>".
-				      "<div class='col' data-pos='crop-left crop-middle' data-jit='4'></div>".
-				      "<div class='col' data-pos='crop-center crop-middle' data-jit='5'></div>".
-				      "<div class='col' data-pos='crop-right crop-middle' data-jit='6'></div>".
-				    "</div>".
-				    "<div class='row' data-row='3'>".
-				      "<div class='col' data-pos='crop-left crop-bottom' data-jit='7'></div>".
-				      "<div class='col' data-pos='crop-center crop-bottom' data-jit='8'></div>".
-				      "<div class='col' data-pos='crop-right crop-bottom' data-jit='9'></div>".
-				    "</div>".
-				  "</div>".						  
-				"</div>";
+
+			if ($this->get('crop_ui') == 'yes'){
+
+				if ($data['crop_instructions']){
+					$imgsrc = $this->s3Client->getObjectUrl($this->get('bucket'),  $this->filenamePrefix($data['filename'],'cropped'));
+					$originalImgName = $this->getOriginalImgName($data['filename']);
+					$style = "left:{$cropData[0]}%;top:{$cropData[1]}%;width:{$cropData[2]}%;height:{$cropData[3]}%;";
+					$html = "<div class='image-wrap pre-upload'>".
+					  "<img id='source-img' src='". $this->s3Client->getObjectUrl($this->get('bucket'), $originalImgName) ."' crossOrigin='crossOrigin' data-dz-thumbnail='data-dz-thumbnail'/>".
+					  "<div class='grid' style='". $style ."'>".
+					    "<div class='row' data-row='1'>".
+					      "<div class='col' data-pos='crop-left crop-top' data-jit='1'></div>".
+					      "<div class='col' data-pos='crop-center crop-top' data-jit='2'></div>".
+					      "<div class='col' data-pos='crop-right crop-top' data-jit='3'></div>".
+					    "</div>".
+					    "<div class='row' data-row='2'>".
+					      "<div class='col' data-pos='crop-left crop-middle' data-jit='4'></div>".
+					      "<div class='col' data-pos='crop-center crop-middle' data-jit='5'></div>".
+					      "<div class='col' data-pos='crop-right crop-middle' data-jit='6'></div>".
+					    "</div>".
+					    "<div class='row' data-row='3'>".
+					      "<div class='col' data-pos='crop-left crop-bottom' data-jit='7'></div>".
+					      "<div class='col' data-pos='crop-center crop-bottom' data-jit='8'></div>".
+					      "<div class='col' data-pos='crop-right crop-bottom' data-jit='9'></div>".
+					    "</div>".
+					  "</div>".						  
+					"</div>";
+				} else {
+					$html = null;
+					$imgsrc='';
+				}
+				$imageCropper = new XMLElement('div', $html, array('class' => 'image-crop-container'));
+				$wrapper->appendChild($imageCropper);
+
+				$cropCanvas = new XMLElement('canvas', NULL, array('id' => 'crop-canvas'));
+				$wrapper->appendChild($cropCanvas);
+
+
+				$imagePreviewContainer = new XMLElement('div', NULL, array('class' => 'image-preview-container'));
+
+		        if ($flagWithError != null) {
+		            $wrapper->appendChild(Widget::Error($imagePreviewContainer, $flagWithError));
+		        } else {
+		            $wrapper->appendChild($imagePreviewContainer);
+		            $wrapper->appendChild(new XMLElement('div', NULL, array('style' => 'clear:both;')));
+		        }
+
+				//TEMP previews - these should have pre-set width/height attributes generated from the field settings
+				$imagePreviewContainer->appendChild(new XMLElement('h4','Landscape'));
+				$imagePreviewContainer->appendChild(new XMLElement('div',"<img src='{$imgsrc}' class='{$data['crop_position']}'/>",array('class'=>'landscape-preview')));
+				$imagePreviewContainer->appendChild(new XMLElement('h4','Portrait'));
+				$imagePreviewContainer->appendChild(new XMLElement('div',"<img src='{$imgsrc}' class='{$data['crop_position']}'/>",array('class'=>'portrait-preview')));
 			} else {
-				$html = null;
-				$imgsrc='';
+				if ($data['crop_instructions']){
+					$imgsrc = $this->s3Client->getObjectUrl($this->get('bucket'),  $this->filenamePrefix($data['filename'],'cropped'));
+					$previewContent = "<div class='image-wrap pre-upload'><img src='{$imgsrc}' class='{$data['crop_position']}' data-dz-thumbnail='data-dz-thumbnail' /></div>";
+				}	
+				
+				$imagePreviewContainer = new XMLElement('div', $previewContent , array('class' => 'image-preview no-crop'));
+				$wrapper->appendChild($imagePreviewContainer);
 			}
-			$imageCropper = new XMLElement('div', $html, array('class' => 'image-crop-container'));
-			$wrapper->appendChild($imageCropper);
-
-			$cropCanvas = new XMLElement('canvas', NULL, array('id' => 'crop-canvas'));
-			$wrapper->appendChild($cropCanvas);
-
-
-			$imagePreviewContainer = new XMLElement('div', NULL, array('class' => 'image-preview-container'));
-
-	        if ($flagWithError != null) {
-	            $wrapper->appendChild(Widget::Error($imagePreviewContainer, $flagWithError));
-	        } else {
-	            $wrapper->appendChild($imagePreviewContainer);
-	            $wrapper->appendChild(new XMLElement('div', NULL, array('style' => 'clear:both;')));
-	        }
-
-			//TEMP previews - these should have pre-set width/height attributes generated from the field settings
-			$imagePreviewContainer->appendChild(new XMLElement('h4','Landscape'));
-			$imagePreviewContainer->appendChild(new XMLElement('div',"<img src='{$imgsrc}' class='{$data['crop_position']}'/>",array('class'=>'landscape-preview')));
-			$imagePreviewContainer->appendChild(new XMLElement('h4','Portrait'));
-			$imagePreviewContainer->appendChild(new XMLElement('div',"<img src='{$imgsrc}' class='{$data['crop_position']}'/>",array('class'=>'portrait-preview')));
-
 
 		}
 

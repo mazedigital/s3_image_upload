@@ -51,10 +51,22 @@
 					`min_width` int(11) unsigned NOT NULL,
 					`min_height` int(11) unsigned NOT NULL,
 					`crop_dimensions` varchar(255) NOT NULL,
+					`crop_ui` enum('yes','no'),
 					PRIMARY KEY  (`id`),
 					KEY `field_id` (`field_id`)
 				) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 			");
+		}
+
+
+		public function update(){
+
+			if(version_compare($previousVersion, '1.1', '<')) {
+				$status[] = Symphony::Database()->query("
+					ALTER TABLE `tbl_fields_s3_image_upload`
+					ADD `crop_ui` enum('yes','no') DEFAULT 'yes'
+				");
+			}
 		}
 		
 		public function uninstall() {

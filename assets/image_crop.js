@@ -99,13 +99,15 @@ CanvasRenderingContext2D.prototype.clear =
 	        } else {
 	        	horizontal = false;
 	        }
-	        if(e.offsetY < 5){
+	        var realYOffset = e.offsetY + e.target.offsetTop;
+	        if(realYOffset < 5){
 	        	vertical = 'top'
-	        } else if($(e.target).height() - e.offsetY < 5){
+	        } else if($(e.target).closest('.grid').height() - realYOffset < 5){
 	        	vertical = 'bottom'
 	        } else {
 	        	vertical = false;
 	        }
+	        console.log('vartical: ' + vertical);
 	        if (vertical || horizontal)
 		        resizing = true;
 	    });
@@ -177,7 +179,8 @@ CanvasRenderingContext2D.prototype.clear =
 			$('input[name="'+fieldPrefix+'[crop_position]').val(selected);
 		});
 
-		$(".dropzone-container").dropzone({ 
+		//with cropping
+		$(".dropzone-container[data-crop-ui='yes']").dropzone({ 
 			url: "/",
 			addRemoveLinks : true,
 			clickable : true,
@@ -205,7 +208,23 @@ CanvasRenderingContext2D.prototype.clear =
 								      "<div class='col' data-pos='crop-center crop-bottom' data-jit='8'></div>"+
 								      "<div class='col' data-pos='crop-right crop-bottom' data-jit='9'></div>"+
 								    "</div>"+
-								  "</div>"+						  
+								  "</div>"+
+								"</div>"
+		});
+
+		//without cropping
+		$(".dropzone-container[data-crop-ui='no']").dropzone({ 
+			url: "/",
+			addRemoveLinks : true,
+			clickable : true,
+			autoProcessQueue : false,
+			maxFiles: 2, //so while one is added one is removed
+			thumbnailWidth: null,
+			thumbnailHeight: null,
+			addRemoveLinks: false,
+			previewsContainer: '.image-preview',
+			previewTemplate: "<div class='image-wrap'>"+
+								  "<img id='source-img' data-dz-thumbnail>"+
 								"</div>"
 		});
 
@@ -217,6 +236,7 @@ CanvasRenderingContext2D.prototype.clear =
 			if (typeof files[0] !== 'undefined'){
 				myDropzone.removeFile(files[0]);
 			}
+			$('.image-wrap.pre-upload').remove();
 		});
 
 
