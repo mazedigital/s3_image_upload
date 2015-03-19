@@ -459,7 +459,7 @@
 						if ($result['crop_position'] != $data['crop_position'] || $result['crop_instructions'] != implode(',', array($data['left'],$data['top'],$data['width'],$data['height']))){
 							$result['crop_position'] = $data['crop_position'];
 							$result['crop_instructions'] = implode(',', array($data['left'],$data['top'],$data['width'],$data['height']));
-							$this->image = ResourceImage::loadExternal( $this->s3Client->getObjectUrl($this->get('bucket'), $this->getOriginalImgName($data['filename'])) );
+							$this->image = ResourceImage::loadExternal( $this->s3Client->getObjectUrl($this->get('bucket'), $this->getOriginalImgName($result['filename'])) );
 							$this->cropImage($data,$result['filename']);
 						}
 					}
