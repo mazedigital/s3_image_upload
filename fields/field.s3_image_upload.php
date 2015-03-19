@@ -316,7 +316,7 @@
 
 		private function cropImage(&$data,$filename){
 			//crop image to dimensions given by the field
-			if (!$data['width'] == $data['height'] && $data['height'] == 100){
+			if (! ($data['width'] == $data['height'] && $data['height'] == 100)){
 				$this->image->cropToDimensions($data['left'],$data['top'],$data['width'],$data['height']);
 			}
 
