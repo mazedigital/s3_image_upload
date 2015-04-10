@@ -92,17 +92,17 @@ CanvasRenderingContext2D.prototype.clear =
 			initialHeight = $frame.height();
 	    	initialTopOffset = parseFloat($frame.css('top'));
 
-	        if(e.offsetX < 5){
+	        if(e.offsetX < 15){
 	        	horizontal = 'left'
-	        } else if($(e.target).width() - e.offsetX < 5){
+	        } else if($(e.target).width() - e.offsetX < 15){
 	        	horizontal = 'right'
 	        } else {
 	        	horizontal = false;
 	        }
 	        var realYOffset = e.offsetY + e.target.offsetTop;
-	        if(realYOffset < 5){
+	        if(realYOffset < 15){
 	        	vertical = 'top'
-	        } else if($(e.target).closest('.grid').height() - realYOffset < 5){
+	        } else if($(e.target).closest('.grid').height() - realYOffset < 15){
 	        	vertical = 'bottom'
 	        } else {
 	        	vertical = false;

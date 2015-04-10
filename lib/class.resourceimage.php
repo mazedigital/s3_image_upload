@@ -22,6 +22,7 @@
 			$meta['width'] = imagesx($copy);
 			$meta['height'] = imagesy($copy);
 			$meta['channels'] = count($colors);
+			$meta['type'] = $this->Meta()->type;
 			$this->_meta = (object)$meta;
 			// $this->_meta = clone $this->_meta;
 		}
@@ -158,6 +159,7 @@
 			$meta['width'] = $width;
 			$meta['height'] = $height;
 			$meta['channels'] = $this->Meta()->channels;
+			$meta['type'] = $this->Meta()->type;
 			$this->_meta = (object)$meta;
 
 		}
