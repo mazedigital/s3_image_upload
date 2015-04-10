@@ -379,6 +379,8 @@
 			$image_data=explode(",",$new_data[1]);
 
 			$imageResource = imagecreatefromstring(base64_decode($image_data[1]));
+			// imagealphablending($imageResource, false);
+			// imagesavealpha($imageResource, true);
 
 			if (!in_array($type, array('data:image/gif','data:image/png','data:image/jpeg'))){
 				throw new Exception('Unsupported image type. Supported types: GIF, JPEG and PNG');

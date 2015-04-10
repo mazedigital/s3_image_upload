@@ -6,6 +6,13 @@
 
 		public function __clone(){
 			$copy = imagecreatetruecolor($this->Meta()->width, $this->Meta()->height);
+			
+			if($this->Meta()->type==3){
+				//must be a png
+				imagealphablending($copy, false);
+				imagesavealpha($copy, true);
+			}
+
 			imagecopy($copy, $this->_resource, 0, 0, 0, 0, $this->Meta()->width, $this->Meta()->height);
 
 			$this->_resource = $copy;
@@ -96,6 +103,8 @@
 				// PNG
 				case 'data:image/png':
 					$meta['type'] = IMAGETYPE_PNG;
+					imagealphablending($imageResource, false);
+					imagesavealpha($imageResource, true);
 					// imagepng($imageResource);
 					break;
 
@@ -110,9 +119,9 @@
 		}
 
 		//to be used to upload things into an S3 bucket
-		public function getStream($quality = Image::DEFAULT_QUALITY, $interlacing = Image::DEFAULT_INTERLACE, $output = null) {
+		public function getStream($quality = Image::DEFAULT_QUALITY, $interlacing = Image::DEFAULT_INTERLACE) {
 			ob_start();
-			self::__render(NULL, $quality, $interlacing, $output);
+			self::__render(null, $quality, $interlacing, $this->Meta()->type);
 			$imageFileContents = ob_get_contents();
 			ob_end_clean();
 			return $imageFileContents;
@@ -130,10 +139,14 @@
 			$height = round($height *$src_h / 100);
 
 			$dest = imagecreatetruecolor($width, $height);
+			if($this->Meta()->type==3){
+				//must be a png
+				imagealphablending($dest, false);
+				imagesavealpha($dest, true);
+			}
 
 			// Copy
 			imagecopy($dest, $this->_resource, 0, 0, $left, $top, $width, $height);
-
 
 			if(is_resource($this->_resource)) {
 				imagedestroy($this->_resource);
