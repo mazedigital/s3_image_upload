@@ -1758,6 +1758,9 @@ require.register("dropzone/lib/dropzone.js", function (exports, module) {
    */
 
   detectVerticalSquash = function(img) {
+    if (img.src.substr(0, img.src.indexOf(';')).substr(5) !== 'image/jpeg'){
+      return 1;
+    }
     var alpha, canvas, ctx, data, ey, ih, iw, py, ratio, sy;
     iw = img.naturalWidth;
     ih = img.naturalHeight;
