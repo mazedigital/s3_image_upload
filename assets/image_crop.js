@@ -166,7 +166,7 @@ CanvasRenderingContext2D.prototype.clear =
 			img.src = source;
 	    }
 
-		var selected = $('input[name="'+fieldPrefix+'[crop_position]').val();
+		var selected = $('input[name="'+fieldPrefix+'[crop_position]"]').val();
 		$(' .col[data-pos="'+ selected +'"]').addClass('active');
 
 		$(document).on('click','.grid .col',function(){
@@ -176,7 +176,7 @@ CanvasRenderingContext2D.prototype.clear =
 			var selected = $(this).data('pos');
 
 			$('.image-preview-container img').removeClass().addClass(selected)
-			$('input[name="'+fieldPrefix+'[crop_position]').val(selected);
+			$('input[name="'+fieldPrefix+'[crop_position]"]').val(selected);
 		});
 
 		//with cropping
@@ -255,7 +255,7 @@ CanvasRenderingContext2D.prototype.clear =
 	        $(' .col.active').removeClass('active');
 	        $(' .col[data-pos="'+ selected +'"]').addClass('active');
 			$('.image-preview-container img').removeClass().addClass(selected)
-			$('input[name="'+fieldPrefix+'[crop_position]').val(selected);
+			$('input[name="'+fieldPrefix+'[crop_position]"]').val(selected);
 		});
 
 		myDropzone.on("success", function(file) {
