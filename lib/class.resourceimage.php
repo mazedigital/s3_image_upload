@@ -7,7 +7,7 @@
 		public function __clone(){
 			$copy = imagecreatetruecolor($this->Meta()->width, $this->Meta()->height);
 			
-			if($this->Meta()->type==3){
+			if($this->Meta()->type==IMAGETYPE_PNG){
 				//must be a png
 				imagealphablending($copy, false);
 				imagesavealpha($copy, true);
@@ -140,7 +140,7 @@
 			$height = round($height *$src_h / 100);
 
 			$dest = imagecreatetruecolor($width, $height);
-			if($this->Meta()->type==3){
+			if($this->Meta()->type==IMAGETYPE_PNG){
 				//must be a png
 				imagealphablending($dest, false);
 				imagesavealpha($dest, true);

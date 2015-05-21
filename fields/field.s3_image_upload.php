@@ -280,6 +280,8 @@
 			$src_w = $image->Meta()->width;
 			$src_h = $image->Meta()->height;
 
+			var_dump($image->Meta()->type);
+
 			$src_r = ($src_w / $src_h);
 
 			if ($dst_h == 0){
@@ -309,7 +311,7 @@
 			$image->applyFilter('crop', array($dst_w, $dst_h, $jit_position));
 
 			try {
-			    $this->s3Client->upload($this->get('bucket'), $this->filenamePrefix($filename,$dst_w.'x'.$dst_h), $image->getStream(), 'public-read');
+			    $this->s3Client->upload($this->get('bucket'), $this->filenamePrefix($filename,$dst_w.'x'.$dst_h), $image->getStream(), 'public-read', array('params' => array('ContentType' => image_type_to_mime_type($image->Meta()->type))));
 			    return true;
 			} catch (S3Exception $e) {
     			echo 'Caught exception: ',  $e->getMessage(), "\n";die;
@@ -326,7 +328,7 @@
 
 
 			try {
-				$this->s3Client->upload($this->get('bucket'), $this->filenamePrefix($filename,'cropped') , $this->image->getStream(), 'public-read');
+				$this->s3Client->upload($this->get('bucket'), $this->filenamePrefix($filename,'cropped') , $this->image->getStream(), 'public-read', array('params' => array('ContentType' => image_type_to_mime_type($this->image->Meta()->type))));
 			} catch (S3Exception $e) {
 				echo "There was an error uploading the file.\n";
 			}
@@ -405,7 +407,7 @@
 				if (!empty($key_prefix))
 					$uploadFilename = $key_prefix . '/' . $filename;
 				else $uploadFilename = $filename;
-				$this->s3Client->upload($this->get('bucket'), $uploadFilename, $this->image->getStream(), 'public-read');
+				$this->s3Client->upload($this->get('bucket'), $uploadFilename, $this->image->getStream(), 'public-read', array('params' => array('ContentType' => image_type_to_mime_type($this->image->Meta()->type))));
 			} catch (S3Exception $e) {
 				echo "There was an error uploading the file.\n";
 			}
