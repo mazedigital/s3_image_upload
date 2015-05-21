@@ -37,10 +37,13 @@
 			$gateway->setopt(CURLOPT_RETURNTRANSFER, true);
 			$gateway->setopt(CURLOPT_FOLLOWLOCATION, true);
 			$gateway->setopt(CURLOPT_MAXREDIRS, Image::CURL_MAXREDIRS);
+			//increase timeout in case of large images
+			$gateway->setopt('TIMEOUT', 60);
 			// get the raw body response, ignore errors
 			$response = @$gateway->exec();
 
 			if($response === false){
+				var_dump($gateway->getInfoLast());die;
 				throw new Exception(sprintf('Error reading external image <code>%s</code>. Please check the URI.', $uri));
 			}
 
