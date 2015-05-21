@@ -44,6 +44,10 @@
 			$sort = 'ORDER BY ' . (in_array(strtolower($order), array('random', 'rand')) ? 'RAND()' : "`ed`.`entry_id` $order");
 		}
 
+		private static function __parseFilter($string){
+			
+		}
+
 		function buildDSRetrivalSQL($data, &$joins, &$where, $andOperation=false){
 
 			$parsed = array();
@@ -463,6 +467,7 @@
 							$result['crop_instructions'] = implode(',', array($data['left'],$data['top'],$data['width'],$data['height']));
 							$this->image = ResourceImage::loadExternal( $this->s3Client->getObjectUrl($this->get('bucket'), $this->getOriginalImgName($result['filename'])) );
 							$this->cropImage($data,$result['filename']);
+							$result['supported_dimensions'] = $data['crop_dimensions'];
 						}
 					}
 				}
