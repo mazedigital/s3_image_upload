@@ -325,6 +325,53 @@
 			}
 		}
 
+		public function cropMissingDimensions($crop_position,$cropDimensions,$filename){
+
+			$this->image = ResourceImage::loadExternal( $this->s3Client->getObjectUrl($this->get('bucket'), $this->filenamePrefix($filename,'cropped')) );
+
+			if (empty($crop_position)){
+				$jit_position = 1;
+			} else {
+				$cropClasses = explode(' ', $crop_position);
+				switch ($cropClasses[0]) {
+					case 'crop-left':
+						$jit_position = 1;
+						break;
+					case 'crop-center':
+						$jit_position = 2;
+						break;
+					case 'crop-right':
+						$jit_position = 3;
+						break;
+					}
+				switch ($cropClasses[1]) {
+					case 'crop-top':
+						$jit_position += 0;
+						break;
+					case 'crop-middle':
+						$jit_position += 3;
+						break;
+					case 'crop-bottom':
+						$jit_position += 6;
+						break;
+					}
+			}
+
+			//for each listed dimension uploaded the resized images
+			$supportedDimensions = array();
+			foreach ($cropDimensions as $key => $dimensions) {
+				$dimension = explode('x', $dimensions);
+				$result = $this->uploadResized($dimension[0],$dimension[1],$jit_position,$filename);
+				if ($result){
+					if (empty($supportedDimensions))
+						$supportedDimensions = $dimensions;
+					else 
+						$supportedDimensions .= ',' . $dimensions;
+				}
+			}
+			return $supportedDimensions;
+		}
+
 
 		private function cropImage(&$data,$filename){
 			//crop image to dimensions given by the field
@@ -384,23 +431,31 @@
 		}
 
 		private function processImage($data,$filename=null){
-			$imgstr = $data['image'];
 
-			$new_data=explode(";",$imgstr);
-			$type=$new_data[0];
-			$image_data=explode(",",$new_data[1]);
+			if ($data['image']){
+				$imgstr = $data['image'];
+	
+				$new_data=explode(";",$imgstr);
+				$type=$new_data[0];
+				$image_data=explode(",",$new_data[1]);
+	
+				$imageResource = imagecreatefromstring(base64_decode($image_data[1]));
+				// imagealphablending($imageResource, false);
+				// imagesavealpha($imageResource, true);
 
-			$imageResource = imagecreatefromstring(base64_decode($image_data[1]));
-			// imagealphablending($imageResource, false);
-			// imagesavealpha($imageResource, true);
+				if (!in_array($type, array('data:image/gif','data:image/png','data:image/jpeg'))){
+					throw new Exception('Unsupported image type. Supported types: GIF, JPEG and PNG');
+				}
+				
+	    		// imagedestroy($imageResource);
 
-			if (!in_array($type, array('data:image/gif','data:image/png','data:image/jpeg'))){
-				throw new Exception('Unsupported image type. Supported types: GIF, JPEG and PNG');
+				$this->image = ResourceImage::load($imageResource,$type);
+
+			} elseif ($data['imagelink']){
+
+				$this->image = ResourceImage::loadExternal( $data['imagelink'] );
+
 			}
-			
-    		// imagedestroy($imageResource);
-
-			$this->image = ResourceImage::load($imageResource,$type);
 
 			//filename structure = filename-timestamp.ext
 			if (!isset($filename)){
@@ -440,7 +495,7 @@
 				return null;
 			}
 
-			if (!empty($data['image'])){
+			if (!empty($data['image']) || !empty($data['imagelink'])){
 
 				$filename = null;
 
