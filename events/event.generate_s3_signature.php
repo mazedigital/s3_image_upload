@@ -82,8 +82,8 @@ class eventgenerate_s3_signature extends Event
 
     function getS3Settings($filename,$contentType,$bucket='mazedigital',$acl='public-read') {
         $AWSbucket = 'mazedigital';
-        $AWSkey = 'AKIAI3QYEEJOKLYXAR7Q';
-        $AWSsecret = '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';
+        $AWSkey = Symphony::Configuration()->get('access-key-id', 's3_image_upload');
+        $AWSsecret = Symphony::Configuration()->get('secret-access-key', 's3_image_upload');
         $AWSregion = 'eu-west-1';
         // $acl = 'public-read'; // private
         

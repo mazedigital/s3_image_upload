@@ -50,7 +50,7 @@
 		}
 
 
-		private function getOriginalImgName($filename){
+		private function getOriginalFileName($filename){
 			$key_prefix = $this->get('key_prefix');
 			if ( !empty($key_prefix) ){
 				return $key_prefix . '/' . $filename;
@@ -154,10 +154,11 @@
 					`id` int(11) unsigned NOT NULL auto_increment,
 					`entry_id` int(11) unsigned NOT NULL,
 					`filename` varchar(255) NOT NULL,
+					`filepath` varchar(255) NOT NULL,
               		`mimetype` varchar(100) default null,
 					PRIMARY KEY  (`id`),
 					KEY `entry_id` (`entry_id`),
-					KEY `filename` (`filename`),
+					KEY `filepath` (`filepath`),
 					KEY `mimetype` (`mimetype`)
 				) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 			");
@@ -167,14 +168,14 @@
 
 			//TODO create error
 			// if (isset($.))
-			// 	var_dump($flagWithError);die;
+				// var_dump($data);die;
 
 			// append assets
 			$assets_path = '/extensions/s3_image_upload/assets/';
 			Administration::instance()->Page->addStylesheetToHead(URL . $assets_path . 'image_crop.css', 'screen', 120, false);
 			Administration::instance()->Page->addStylesheetToHead(URL . $assets_path . 'dropzone.css', 'screen', 130, false);
 			Administration::instance()->Page->addScriptToHead(URL . $assets_path . 'dropzone.js', 420, false);
-			Administration::instance()->Page->addScriptToHead(URL . $assets_path . 'image_crop.js', 430, false);
+			Administration::instance()->Page->addScriptToHead(URL . $assets_path . 'file_upload.js', 430, false);
 
 			// initialize some variables
 			$id = $this->get('id');
@@ -190,20 +191,45 @@
 			$wrapper->appendChild($label);
 
 			// main upload container
-			$dropzoneContainer = new XMLElement('div', "Drop files or click to upload", array('class' => 'dropzone-container','data-crop-ui' => 'no'));
+			$dropzoneContainer = new XMLElement('div', "<span class='dropzone-click'>Drop files or click to upload</span>", array('class' => 'dropzone-container','data-file-upload' => 'yes'));
 			$wrapper->appendChild($dropzoneContainer);
 
+			// var_dump($data);die;
+
 			if (isset($data['filename'])){
-				$filesrc = $this->s3Client->getObjectUrl($this->get('bucket'),  $data['filename']);
-				$previewContent = "<div class='file-container'><a href='{$filesrc}' target='_blank' data-dz-thumbnail='data-dz-thumbnail'>{$data['filename']}</a></div>";
+				if (!is_array($data['filename'])){
+					$data['filename'] = array($data['filename']);
+					$data['filepath'] = array($data['filepath']);
+					$data['mimetype'] = array($data['mimetype']);
+				}
+				$wrapper->setAttribute('data-filenumber',sizeof($data['filename']));
+				$previewContent = '';
+				foreach ($data['filename'] as $key => $value) {
+					$filesrc = $this->s3Client->getObjectUrl($this->get('bucket'),  $data['filepath'][$key]);
+					$previewContent .= 	'<div class="dz-preview dz-file-preview">'.
+											'<div class="dz-details">'.
+												'<img data-dz-thumbnail />'.
+												'<div class="dz-text-details">'.
+													"<div class='dz-filename'><span data-dz-name><a href='{$filesrc}' target='_blank'>{$data['filename'][$key]}</a></span></div>".
+													'<div class="dz-size" data-dz-size></div>'.
+												'</div>'.
+											'</div>'.
+										'</div>' . 
+
+										"<input name='{$fieldname}[filename][{$key}]' value='{$data['filename'][$key]}' type='hidden'/>" .
+										"<input name='{$fieldname}[filepath][{$key}]' value='{$data['filepath'][$key]}' type='hidden'/>" .
+										"<input name='{$fieldname}[mimetype][{$key}]' value='{$data['mimetype'][$key]}' type='hidden'/>" ;
+				}
 			}
 
+			$filePreviewContainer = new XMLElement('div', $previewContent , array('class' => 'file-preview dropzone-previews'));
+			$wrapper->appendChild($filePreviewContainer);
 		}
 
 		function prepareTableValue($data, XMLElement $link=NULL, $entry_id = NULL){
 
 			if (isset($entry_id) && isset($data['filename'])) {
-				$url = $this->s3Client->getObjectUrl($this->get('bucket'), $data['filename']);
+				$url = $this->s3Client->getObjectUrl($this->get('bucket'), $data['filepath']);
 
 				$file = '<a href="' . $url . '">'.$data['filename'].'</a>>';
 			} else {
@@ -231,9 +257,8 @@
 			$element = new XMLElement($this->get('element_name'));
 
 			$element->setAttributeArray(array(
-				'crop-position' => $data['crop_position'],
-				'original' => $this->s3Client->getObjectUrl($this->get('bucket'),$this->getOriginalImgName($data['filename'])),
-				'original-key' => $this->getOriginalImgName($data['filename'])
+				'source' => $this->s3Client->getObjectUrl($this->get('bucket'),$data['filepath']),
+				'key' => $data['filepath']
 			));
 
 			$wrapper->appendChild($element);
