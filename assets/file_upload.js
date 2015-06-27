@@ -3,10 +3,13 @@
 	$(document).ready(function(){
 		
 		var fieldPrefix = $('.field-s3_file_upload').data('field-name');
+		var region = $('.field-s3_file_upload').data('region');
+		if (region == 'us-east-1') region = 's3'; 
 
+		var s3URL = 'https://'+$('.field-s3_file_upload').data('bucket')+'.'+region+'.amazonaws.com'
 
 		$(".dropzone-container[data-file-upload='yes']").dropzone({ 
-			url: 'https://mazedigital.s3-eu-west-1.amazonaws.com',
+			url: s3URL,
 			maxFilesize: "10",
 			method: "post",
 			autoProcessQueue: true,
@@ -32,7 +35,7 @@
 				file.postData = [];
 				$.ajax({
 					url: '/ajax/',
-					data: {"action[generate-s3-signature]": 'submit', "fields[name]": file.name, "fields[type]": file.type, "fields[size]": file.size},
+					data: {"action[generate-s3-signature]": 'submit', "fields[name]": file.name, "fields[type]": file.type, "fields[size]": file.size, "fields[id]":  $('.field-s3_file_upload').data('id')},
 					type: 'POST',
 					dataType: 'json',
 					success: function(response)

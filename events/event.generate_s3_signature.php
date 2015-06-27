@@ -80,12 +80,15 @@ class eventgenerate_s3_signature extends Event
                 <pre class="XML"><code>&lt;input name="redirect" type="hidden" value="http://maze.dev/success/" /></code></pre>';
     }
 
-    function getS3Settings($filename,$contentType,$bucket='mazedigital',$acl='public-read') {
-        $AWSbucket = 'mazedigital';
+    function getS3Settings($filename,$contentType,$fieldID) {
         $AWSkey = Symphony::Configuration()->get('access-key-id', 's3_image_upload');
         $AWSsecret = Symphony::Configuration()->get('secret-access-key', 's3_image_upload');
-        $AWSregion = 'eu-west-1';
-        // $acl = 'public-read'; // private
+
+        $field = FieldManager::fetch($fieldID);
+
+        $AWSbucket = $field->get('bucket');
+        $AWSregion = $field->get('region');
+        $acl= $field->get('acl');
         
         // Get the file extension
         $file = pathinfo($filename);
@@ -96,7 +99,7 @@ class eventgenerate_s3_signature extends Event
         
         // Prepare the filename
         $fileName = General::createHandle($file['filename'],50) . '-' . time();
-        $key = 'start-a-project/'.$fileName.'.'.$file['extension'];
+        $key = $field->get('key_prefix') . '/'.$fileName.'.'.$file['extension'];
         
         // Set the expiration time of the policy
         $policyExpiration = gmdate('Y-m-d\TH:i:s\Z', strtotime('+1 hour'));
@@ -174,7 +177,7 @@ class eventgenerate_s3_signature extends Event
         if (isset($_POST['action']['generate-s3-signature'])) {
             // return $this->getS3Settings();
             header('Content-Type: application/json');
-            echo json_encode($this->getS3Settings($_POST['fields']['name'],$_POST['fields']['type'],$_POST['fields']['bucket']));die;
+            echo json_encode($this->getS3Settings($_POST['fields']['name'],$_POST['fields']['type'],$_POST['fields']['id']));die;
         }
     }
 

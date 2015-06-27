@@ -61,6 +61,8 @@
 					`field_id` int(11) unsigned NOT NULL,
 					`bucket` varchar(50) NOT NULL,
 					`key_prefix` varchar(50) NOT NULL,
+					`region` varchar(50) NOT NULL,
+					`acl` varchar(50) NOT NULL,
 					PRIMARY KEY  (`id`),
 					KEY `field_id` (`field_id`)
 				) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -77,6 +79,8 @@
 						`field_id` int(11) unsigned NOT NULL,
 						`bucket` varchar(50) NOT NULL,
 						`key_prefix` varchar(50) NOT NULL,
+						`region` varchar(50) NOT NULL,
+						`acl` varchar(50) NOT NULL,
 						PRIMARY KEY  (`id`),
 						KEY `field_id` (`field_id`)
 					) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

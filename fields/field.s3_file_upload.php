@@ -78,10 +78,6 @@
 
 		public function processRawFieldData($data, &$status, &$message = null, $simulate = false, $entry_id = null){
 			$status = self::__OK__;
-
-			if (!empty($data)){
-				var_dump($data);
-			}
 			// all uploads to be done via Javascript makes life simple :)
 
 			return $data;
@@ -95,7 +91,7 @@
 
 			// bucket details
 			$bucket_details = new XMLElement('div', NULL, array('class' => 'two columns'));
-			$label = Widget::Label(__('Bucket Name <i>Optional</i>'));
+			$label = Widget::Label(__('Bucket Name'));
 			$label->addClass('column');
 			$label->appendChild(Widget::Input('fields['.$this->get('sortorder').'][bucket]', $this->get('bucket')?$this->get('bucket'):''));
 			if(isset($errors['bucket'])) {
@@ -103,11 +99,30 @@
 			} else {
 				$bucket_details->appendChild($label);
 			};
-			$label = Widget::Label(__('Key Prefix <i>Optional</i>'));
+			$label = Widget::Label(__('Key Prefix'));
 			$label->addClass('column');
 			$label->appendChild(Widget::Input('fields['.$this->get('sortorder').'][key_prefix]', $this->get('key_prefix')?$this->get('key_prefix'):''));
 			if(isset($errors['key_prefix'])) {
 				$bucket_details->appendChild(Widget::wrapFormElementWithError($label, $errors['key_prefix']));
+			} else {
+				$bucket_details->appendChild($label);
+			};
+			$wrapper->appendChild($bucket_details);
+
+			$bucket_details = new XMLElement('div', NULL, array('class' => 'two columns'));
+			$label = Widget::Label(__('Region'));
+			$label->addClass('column');
+			$label->appendChild(Widget::Input('fields['.$this->get('sortorder').'][region]', $this->get('region')?$this->get('region'):''));
+			if(isset($errors['region'])) {
+				$bucket_details->appendChild(Widget::wrapFormElementWithError($label, $errors['region']));
+			} else {
+				$bucket_details->appendChild($label);
+			};
+			$label = Widget::Label(__('Access Control (ACL)'));
+			$label->addClass('column');
+			$label->appendChild(Widget::Input('fields['.$this->get('sortorder').'][acl]', $this->get('acl')?$this->get('acl'):''));
+			if(isset($errors['acl'])) {
+				$bucket_details->appendChild(Widget::wrapFormElementWithError($label, $errors['acl']));
 			} else {
 				$bucket_details->appendChild($label);
 			};
@@ -166,10 +181,6 @@
 
 		function displayPublishPanel(&$wrapper, $data=NULL, $flagWithError=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL, $entry_id) {
 
-			//TODO create error
-			// if (isset($.))
-				// var_dump($data);die;
-
 			// append assets
 			$assets_path = '/extensions/s3_image_upload/assets/';
 			Administration::instance()->Page->addStylesheetToHead(URL . $assets_path . 'image_crop.css', 'screen', 120, false);
@@ -183,6 +194,10 @@
 			$fieldname = 'fields' . $fieldnamePrefix . '['. $this->get('element_name') . ']' . $fieldnamePostfix;
 
 			$wrapper->setAttribute('data-field-name',$fieldname);
+			$wrapper->setAttribute('data-bucket',$this->get('bucket'));
+			$wrapper->setAttribute('data-region',$this->get('region'));
+			$wrapper->setAttribute('data-acl',$this->get('acl'));
+			$wrapper->setAttribute('data-id',$this->get('id'));
 
 			// main field label
 			$label = new XMLElement('p', $this->get('label'), array('class' => 'label'));
@@ -193,8 +208,6 @@
 			// main upload container
 			$dropzoneContainer = new XMLElement('div', "<span class='dropzone-click'>Drop files or click to upload</span>", array('class' => 'dropzone-container','data-file-upload' => 'yes'));
 			$wrapper->appendChild($dropzoneContainer);
-
-			// var_dump($data);die;
 
 			if (isset($data['filename'])){
 				if (!is_array($data['filename'])){
@@ -291,10 +304,7 @@
 					if ($info['http_code'] != 200){
 						return null; //image does not exist
 					}
-					// var_dump(basename($data));die;
-					// var_dump($info);
-					// var_dump($result);die;
-
+					
 					$base64 = 'data:' . $info['content_type'] . ';base64,' . base64_encode($result);
 					//create new data array
 					$newData = array(
