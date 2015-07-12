@@ -151,6 +151,8 @@
 			$all_fields = array(
 				'bucket',
 				'key_prefix',
+				'acl',
+				'region',
 			);
 			foreach ($all_fields as $field) {
 				$value = $this->get($field);
@@ -266,13 +268,14 @@
 
 		public function appendFormattedElement(&$wrapper, $data, $encode = false) {
 			
-			
 			$element = new XMLElement($this->get('element_name'));
 
-			$element->setAttributeArray(array(
-				'source' => $this->s3Client->getObjectUrl($this->get('bucket'),$data['filepath']),
-				'key' => $data['filepath']
-			));
+			foreach ($data['filename'] as $key => $value) {
+				$filesrc = $this->s3Client->getObjectUrl($this->get('bucket'),  $data['filepath'][$key]);
+
+				$file = new XMLElement('file',null,array('source'=>$filesrc,'mimetype'=> $data['mimetype'][$key]));
+				$element->appendChild($file);
+			}
 
 			$wrapper->appendChild($element);
 
