@@ -243,8 +243,8 @@ CanvasRenderingContext2D.prototype.clear =
 		myDropzone.on("thumbnail", function(file) {
 			var height = $('.image-wrap img').height();
 			var width = $('.image-wrap img').width();
-			$('.grid').height(height);
-			$('.grid').width(width);
+			// $('.grid').height(height);
+			// $('.grid').width(width);
 
 	        var fieldPrefix = $('.field-s3_image_upload').data('field-name');
 	        $('input[name="'+fieldPrefix+'[image]"]').val($('#source-img').attr('src'));

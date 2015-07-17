@@ -2,9 +2,10 @@
 	overflow:hidden;
 	position:relative;
 	float:left;
-	width:70%;
-	max-width: 1000px;
-	max-height: 700px;
+	max-width: 100%;
+	max-height: 100%;
+	/*width: 1000px;
+	height: 700px;*/
 }
 
 .no-crop .image-wrap{
@@ -14,7 +15,8 @@
 
 .image-wrap>img{
 	//position:absolute;
-	width: 100%;
+	max-width: 100%;
+	max-height: 100%;
 	float:left;
 }
 
@@ -29,6 +31,8 @@
 	left:0;
 	right:0;
 	bottom:0;
+	max-width: 100%;
+	max-height:100%;
 }
 .image-wrap .row{
 	height:33.33%;
