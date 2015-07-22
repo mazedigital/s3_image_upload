@@ -217,13 +217,22 @@
 					$data['filepath'] = array($data['filepath']);
 					$data['mimetype'] = array($data['mimetype']);
 				}
+
 				$wrapper->setAttribute('data-filenumber',sizeof($data['filename']));
 				$previewContent = '';
 				foreach ($data['filename'] as $key => $value) {
 					$filesrc = $this->s3Client->getObjectUrl($this->get('bucket'),  $data['filepath'][$key]);
-					$previewContent .= 	'<div class="dz-preview dz-file-preview">'.
+
+					$fileType = 'file';
+					$previewImage = '';
+					if (strpos($data['mimetype'][$key], 'image') > -1){
+						$previewImage = $filesrc;
+						$fileType = 'image';
+					}
+
+					$previewContent .= 	"<div class='dz-preview dz-{$fileType}-preview'>".
 											'<div class="dz-details">'.
-												'<img data-dz-thumbnail />'.
+												"<img data-dz-thumbnail src='{$filesrc}'/>".
 												'<div class="dz-text-details">'.
 													"<div class='dz-filename'><span data-dz-name><a href='{$filesrc}' target='_blank'>{$data['filename'][$key]}</a></span></div>".
 													'<div class="dz-size" data-dz-size></div>'.

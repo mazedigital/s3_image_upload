@@ -10,13 +10,13 @@
 
 		$(".dropzone-container[data-file-upload='yes']").dropzone({ 
 			url: s3URL,
-			maxFilesize: "10",
+			maxFilesize: "100",
 			method: "post",
 			autoProcessQueue: true,
 			maxfiles: 999,
 			parallelUploads: 2,
 			clickable: '.dropzone-click',
-			dictDefaultMessage: "Drop files here to upload - Maximum Size : 10MB",
+			dictDefaultMessage: "Drop files here to upload - Maximum Size : 100MB",
 			previewsContainer: '.dropzone-previews',
 			previewTemplate: '<div class="dz-preview dz-file-preview">'+
 								'<div class="dz-details">'+
