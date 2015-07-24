@@ -94,7 +94,7 @@
 
 				// JPEG
 				case 'data:image/jpeg':
-					if($meta->channels <= 3){
+					if($meta['channels'] <= 3 || ($meta['channels'] == 4 && $colors['alpha'] == null )){
 						// imagejpeg($imageResource);
 						$meta['type'] = IMAGETYPE_JPEG;
 					}
