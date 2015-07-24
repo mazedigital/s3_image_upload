@@ -149,6 +149,13 @@
 
 				$imageResource = imagecreatefromstring(base64_decode($image_data[1]));
 
+				if (!is_numeric($data['width'])){
+					$data['width'] = 100;
+				}
+				if (!is_numeric($data['height'])){
+					$data['height'] = 100;
+				}
+
 				//get width and height and multiply by size of the crop by hte UI to get final width/height
 				$width = round(imagesx($imageResource) * $data['width'] / 100);
 				$height = round(imagesy($imageResource) * $data['height'] / 100);
@@ -374,6 +381,14 @@
 
 
 		private function cropImage(&$data,$filename){
+
+			if (!is_numeric($data['width'])){
+				$data['width'] = 100;
+			}
+			if (!is_numeric($data['height'])){
+				$data['height'] = 100;
+			}
+
 			//crop image to dimensions given by the field
 			if (! ($data['width'] == $data['height'] && $data['height'] == 100)){
 				$this->image->cropToDimensions($data['left'],$data['top'],$data['width'],$data['height']);
