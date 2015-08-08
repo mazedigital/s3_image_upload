@@ -55,11 +55,37 @@
 					PRIMARY KEY  (`id`),
 					KEY `field_id` (`field_id`)
 				) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+				CREATE TABLE `tbl_fields_s3_file_upload` (
+					`id` int(11) unsigned NOT NULL auto_increment,
+					`field_id` int(11) unsigned NOT NULL,
+					`bucket` varchar(50) NOT NULL,
+					`key_prefix` varchar(50) NOT NULL,
+					`region` varchar(50) NOT NULL,
+					`acl` varchar(50) NOT NULL,
+					PRIMARY KEY  (`id`),
+					KEY `field_id` (`field_id`)
+				) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 			");
 		}
 
 
 		public function update(){
+
+			if(version_compare($previousVersion, '1.2', '<')) {
+				$status[] = Symphony::Database()->query("
+					CREATE TABLE `tbl_fields_s3_file_upload` (
+						`id` int(11) unsigned NOT NULL auto_increment,
+						`field_id` int(11) unsigned NOT NULL,
+						`bucket` varchar(50) NOT NULL,
+						`key_prefix` varchar(50) NOT NULL,
+						`region` varchar(50) NOT NULL,
+						`acl` varchar(50) NOT NULL,
+						PRIMARY KEY  (`id`),
+						KEY `field_id` (`field_id`)
+					) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+				");
+			}
 
 			if(version_compare($previousVersion, '1.1', '<')) {
 				$status[] = Symphony::Database()->query("
