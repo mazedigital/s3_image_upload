@@ -851,6 +851,13 @@
 			return $data['filename'];
 		}
 
+		private function setEndpoint($s3ObjectUrl){
+			$customEndpoint = $this->get('custom_endpoint');
+			if ($customEndpoint == "yes"){
+				return str_replace("https://s3.amazonaws.com/" . $this->get('bucket') , "http://" . $this->get('bucket'), $s3ObjectUrl);
+			} else return $s3ObjectUrl;
+		}
+
 		public function appendFormattedElement(&$wrapper, $data, $encode = false) {
 			
 			
@@ -858,11 +865,11 @@
 
 			$dimensions = new XMLElement('supported-dimensions');
 			foreach ( explode(',', $data['supported_dimensions']) as $key => $value) {
-				$dimensions->appendChild(new XMLElement('image',$this->s3Client->getObjectUrl($this->get('bucket'),$this->filenamePrefix($data['filename'],$value)),array('dimension'=>$value)));
+				$dimensions->appendChild(new XMLElement('image',$this->setEndpoint($this->s3Client->getObjectUrl($this->get('bucket'),$this->filenamePrefix($data['filename'],$value)),array('dimension'=>$value))));
 			}
 
 			//add image as cropped by user
-			$dimensions->appendChild(new XMLElement('image',$this->s3Client->getObjectUrl($this->get('bucket'),$this->filenamePrefix($data['filename'],'cropped')),array('dimension'=>'cropped')));
+			$dimensions->appendChild(new XMLElement('image',$this->setEndpoint($this->s3Client->getObjectUrl($this->get('bucket'),$this->filenamePrefix($data['filename'],'cropped')),array('dimension'=>'cropped'))));
 
 			$element->appendChild($dimensions);
 
@@ -870,7 +877,7 @@
 				// 'width' => $data['width'],
 				// 'height' => $data['height'],
 				'crop-position' => $data['crop_position'],
-				'original' => $this->s3Client->getObjectUrl($this->get('bucket'),$this->getOriginalImgName($data['filename'])),
+				'original' => $this->setEndpoint($this->s3Client->getObjectUrl($this->get('bucket'),$this->getOriginalImgName($data['filename']))),
 				'original-key' => $this->getOriginalImgName($data['filename'])
 			));
 

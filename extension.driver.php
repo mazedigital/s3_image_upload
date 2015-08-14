@@ -47,6 +47,7 @@
 					`id` int(11) unsigned NOT NULL auto_increment,
 					`field_id` int(11) unsigned NOT NULL,
 					`bucket` varchar(50) NOT NULL,
+					`domain` varchar(50) DEFAULT NULL,
 					`key_prefix` varchar(50) NOT NULL,
 					`min_width` int(11) unsigned NOT NULL,
 					`min_height` int(11) unsigned NOT NULL,
@@ -65,6 +66,13 @@
 				$status[] = Symphony::Database()->query("
 					ALTER TABLE `tbl_fields_s3_image_upload`
 					ADD `crop_ui` enum('yes','no') DEFAULT 'yes'
+				");
+			}
+
+			if(version_compare($previousVersion, '1.1.1', '<')) {
+				$status[] = Symphony::Database()->query("
+					ALTER TABLE `tbl_fields_s3_image_upload`
+					ADD `custom_endpoint` enum('yes','no') DEFAULT 'no'
 				");
 			}
 		}
