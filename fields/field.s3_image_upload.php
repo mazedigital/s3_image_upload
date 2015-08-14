@@ -865,7 +865,7 @@
 
 			$dimensions = new XMLElement('supported-dimensions');
 			foreach ( explode(',', $data['supported_dimensions']) as $key => $value) {
-				$dimensions->appendChild(new XMLElement('image',$this->setEndpoint($this->s3Client->getObjectUrl($this->get('bucket'),$this->filenamePrefix($data['filename'],$value)),array('dimension'=>$value))));
+				$dimensions->appendChild(new XMLElement('image',$this->setEndpoint($this->s3Client->getObjectUrl($this->get('bucket'),$this->filenamePrefix($data['filename'],$value))),array('dimension'=>$value)));
 			}
 
 			//add image as cropped by user
