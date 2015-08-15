@@ -27,6 +27,7 @@
 			$this->s3Client = S3Client::factory(array(
 			    'key'    => Symphony::Configuration()->get('access-key-id', 's3_image_upload'),
 			    'secret' => Symphony::Configuration()->get('secret-access-key', 's3_image_upload'),
+			    'region' => $this->get('region'),
 			));
 		}
 
@@ -639,6 +640,15 @@
 			if($this->get('crop_ui') == 'yes') {
 				$input->setAttribute('checked', 'checked');
 			}
+			
+			$label = Widget::Label(__('Region'));
+			$label->addClass('column');
+			$label->appendChild(Widget::Input('fields['.$this->get('sortorder').'][region]', $this->get('region')?$this->get('region'):''));
+			if(isset($errors['region'])) {
+				$column->appendChild(Widget::wrapFormElementWithError($label, $errors['region']));
+			} else {
+				$column->appendChild($label);
+			};
 
 			$this->appendShowColumnCheckbox($column);
 			$wrapper->appendChild($column);
