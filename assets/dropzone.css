@@ -57,6 +57,7 @@
   background: #ebebeb;
   padding: 5px;
   margin-bottom: 22px;
+  overflow: hidden;
 }
 .dropzone .dz-preview .dz-details .dz-filename,
 .dropzone-previews .dz-preview .dz-details .dz-filename {
@@ -65,11 +66,22 @@
 }
 .dropzone .dz-preview .dz-details img,
 .dropzone-previews .dz-preview .dz-details img {
-  position: absolute;
+/*  position: absolute;
   top: 0;
   left: 0;
   width: 100px;
-  height: 100px;
+  height: 100px;*/
+
+  position: absolute;
+  max-width: 200px;
+  max-height: 200px;
+  min-width: 100%;
+  min-height: 100%;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%,-50%);
+  pointer-events:none;
+}
 }
 .dropzone .dz-preview .dz-details .dz-size,
 .dropzone-previews .dz-preview .dz-details .dz-size {

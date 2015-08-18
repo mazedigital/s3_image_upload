@@ -22,12 +22,20 @@
 			$this->_required = false;
 			$this->_showcolumn = true;
 
+			$this->s3Client = null;
+		}
 
-			// Instantiate an S3 client
-			$this->s3Client = S3Client::factory(array(
-			    'key'    => Symphony::Configuration()->get('access-key-id', 's3_image_upload'),
-			    'secret' => Symphony::Configuration()->get('secret-access-key', 's3_image_upload'),
-			));
+		private function initializeClient(){
+
+			if (!$this->s3Client){
+
+				// Instantiate an S3 client
+				$this->s3Client = S3Client::factory(array(
+					'key'    => Symphony::Configuration()->get('access-key-id', 's3_image_upload'),
+					'secret' => Symphony::Configuration()->get('secret-access-key', 's3_image_upload'),
+					'region' => $this->get('region'),
+				));
+			}
 		}
 
 		function canFilter(){
@@ -324,16 +332,17 @@
 			$image->applyFilter('crop', array($dst_w, $dst_h, $jit_position));
 
 			try {
-			    $this->s3Client->upload($this->get('bucket'), $fullPath, $image->getStream(), 'public-read', array('params' => array('ContentType' => image_type_to_mime_type($image->Meta()->type))));
-			    return true;
+				$this->s3Client->upload($this->get('bucket'), $fullPath, $image->getStream(), 'public-read', array('params' => array('ContentType' => image_type_to_mime_type($image->Meta()->type))));
+				return true;
 			} catch (S3Exception $e) {
-    			echo 'Caught exception: ',  $e->getMessage(), "\n";die;
-			    echo "There was an error uploading the file.\n";
+				echo 'Caught exception: ',  $e->getMessage(), "\n";die;
+				echo "There was an error uploading the file.\n";
 			}
 		}
 
 		public function cropMissingDimensions($crop_position,$cropDimensions,$filename){
 
+			$this->initializeClient();
 			$this->image = ResourceImage::loadExternal( $this->s3Client->getObjectUrl($this->get('bucket'), $this->filenamePrefix($filename,'cropped')) );
 
 			if (empty($crop_position)){
@@ -446,6 +455,7 @@
 		}
 
 		private function processImage($data,$filename=null){
+			$this->initializeClient();
 
 			if ($data['image']){
 				$imgstr = $data['image'];
@@ -462,7 +472,7 @@
 					throw new Exception('Unsupported image type. Supported types: GIF, JPEG and PNG');
 				}
 				
-	    		// imagedestroy($imageResource);
+				// imagedestroy($imageResource);
 
 				$this->image = ResourceImage::load($imageResource,$type);
 
@@ -503,6 +513,7 @@
 		}
 
 		public function processRawFieldData($data, &$status, &$message = null, $simulate = false, $entry_id = null){
+			$this->initializeClient();
 			$status = self::__OK__;
 
 			// No file given, save empty data:
@@ -639,6 +650,15 @@
 			if($this->get('crop_ui') == 'yes') {
 				$input->setAttribute('checked', 'checked');
 			}
+			
+			$label = Widget::Label(__('Region'));
+			$label->addClass('column');
+			$label->appendChild(Widget::Input('fields['.$this->get('sortorder').'][region]', $this->get('region')?$this->get('region'):''));
+			if(isset($errors['region'])) {
+				$column->appendChild(Widget::wrapFormElementWithError($label, $errors['region']));
+			} else {
+				$column->appendChild($label);
+			};
 
 			$this->appendShowColumnCheckbox($column);
 			$wrapper->appendChild($column);
@@ -707,7 +727,8 @@
 		}
 
 		function displayPublishPanel(&$wrapper, $data=NULL, $flagWithError=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL, $entry_id) {
-
+			
+			$this->initializeClient();
 			//TODO create error
 			// if (isset($.))
 			// 	var_dump($flagWithError);die;
@@ -771,21 +792,21 @@
 					$html = "<div class='image-wrap pre-upload'>".
 					  "<img id='source-img' src='". $this->s3Client->getObjectUrl($this->get('bucket'), $originalImgName) ."' crossOrigin='crossOrigin' data-dz-thumbnail='data-dz-thumbnail'/>".
 					  "<div class='grid' style='". $style ."'>".
-					    "<div class='row' data-row='1'>".
-					      "<div class='col' data-pos='crop-left crop-top' data-jit='1'></div>".
-					      "<div class='col' data-pos='crop-center crop-top' data-jit='2'></div>".
-					      "<div class='col' data-pos='crop-right crop-top' data-jit='3'></div>".
-					    "</div>".
-					    "<div class='row' data-row='2'>".
-					      "<div class='col' data-pos='crop-left crop-middle' data-jit='4'></div>".
-					      "<div class='col' data-pos='crop-center crop-middle' data-jit='5'></div>".
-					      "<div class='col' data-pos='crop-right crop-middle' data-jit='6'></div>".
-					    "</div>".
-					    "<div class='row' data-row='3'>".
-					      "<div class='col' data-pos='crop-left crop-bottom' data-jit='7'></div>".
-					      "<div class='col' data-pos='crop-center crop-bottom' data-jit='8'></div>".
-					      "<div class='col' data-pos='crop-right crop-bottom' data-jit='9'></div>".
-					    "</div>".
+						"<div class='row' data-row='1'>".
+						  "<div class='col' data-pos='crop-left crop-top' data-jit='1'></div>".
+						  "<div class='col' data-pos='crop-center crop-top' data-jit='2'></div>".
+						  "<div class='col' data-pos='crop-right crop-top' data-jit='3'></div>".
+						"</div>".
+						"<div class='row' data-row='2'>".
+						  "<div class='col' data-pos='crop-left crop-middle' data-jit='4'></div>".
+						  "<div class='col' data-pos='crop-center crop-middle' data-jit='5'></div>".
+						  "<div class='col' data-pos='crop-right crop-middle' data-jit='6'></div>".
+						"</div>".
+						"<div class='row' data-row='3'>".
+						  "<div class='col' data-pos='crop-left crop-bottom' data-jit='7'></div>".
+						  "<div class='col' data-pos='crop-center crop-bottom' data-jit='8'></div>".
+						  "<div class='col' data-pos='crop-right crop-bottom' data-jit='9'></div>".
+						"</div>".
 					  "</div>".						  
 					"</div>";
 				} else {
@@ -801,12 +822,12 @@
 
 				$imagePreviewContainer = new XMLElement('div', NULL, array('class' => 'image-preview-container'));
 
-		        if ($flagWithError != null) {
-		            $wrapper->appendChild(Widget::Error($imagePreviewContainer, $flagWithError));
-		        } else {
-		            $wrapper->appendChild($imagePreviewContainer);
-		            $wrapper->appendChild(new XMLElement('div', NULL, array('style' => 'clear:both;')));
-		        }
+				if ($flagWithError != null) {
+					$wrapper->appendChild(Widget::Error($imagePreviewContainer, $flagWithError));
+				} else {
+					$wrapper->appendChild($imagePreviewContainer);
+					$wrapper->appendChild(new XMLElement('div', NULL, array('style' => 'clear:both;')));
+				}
 
 				//TEMP previews - these should have pre-set width/height attributes generated from the field settings
 				$imagePreviewContainer->appendChild(new XMLElement('h4','Landscape'));
@@ -826,7 +847,7 @@
 		}
 
 		function prepareTableValue($data, XMLElement $link=NULL, $entry_id = NULL){
-
+			$this->initializeClient();
 
 			if (isset($entry_id) && isset($data['filename'])) {
 				$url = $this->s3Client->getObjectUrl($this->get('bucket'), $this->filenamePrefix($data['filename'],'50x50'));
@@ -859,7 +880,7 @@
 		}
 
 		public function appendFormattedElement(&$wrapper, $data, $encode = false) {
-			
+			$this->initializeClient();
 			
 			$element = new XMLElement($this->get('element_name'));
 
