@@ -49,7 +49,7 @@
 
 			//get type from extension
 			$extension_pos = strrpos($uri, '.'); // find position of the last dot, so where the extension starts
-			$extension =  substr($uri, $extension_pos+1);
+			$extension =  strtolower(substr($uri, $extension_pos+1));
 			$type = "";
 			switch ($extension) {
 				case 'gif':
@@ -85,6 +85,7 @@
 			$meta['height'] = imagesy($imageResource);
 			$meta['channels'] = count($colors);
 			// header("Content-type:".$type);
+
 			switch($type) {
 				// GIF
 				case 'data:image/gif':
