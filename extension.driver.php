@@ -66,6 +66,7 @@
 					`key_prefix` varchar(50) NOT NULL,
 					`region` varchar(50) NOT NULL,
 					`acl` varchar(50) NOT NULL,
+					`custom_endpoint` enum('yes','no') DEFAULT 'no',
 					PRIMARY KEY  (`id`),
 					KEY `field_id` (`field_id`)
 				) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -73,7 +74,14 @@
 		}
 
 
-		public function update(){
+		public function update($previousVersion){
+
+			if(version_compare($previousVersion, '1.2.2', '<')) {
+				$status[] = Symphony::Database()->query("
+					ALTER TABLE `tbl_fields_s3_file_upload`
+					ADD `custom_endpoint` enum('yes','no') DEFAULT 'no'
+				");
+			}
 
 			if(version_compare($previousVersion, '1.2.1', '<')) {
 				$status[] = Symphony::Database()->query("

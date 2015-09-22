@@ -3,10 +3,10 @@
 	$(document).ready(function(){
 		
 		var fieldPrefix = $('.field-s3_file_upload').data('field-name');
-		var region = $('.field-s3_file_upload').data('region');
-		if (region == 'us-east-1') region = 's3'; 
+		var region = $('.field-s3_file_upload').data('region') + '.';
+		if (region == 'us-east-1') region = '';
 
-		var s3URL = 'https://'+$('.field-s3_file_upload').data('bucket')+'.'+region+'.amazonaws.com'
+		var s3URL = 'http://'+$('.field-s3_file_upload').data('bucket')+'.s3.'+region+'amazonaws.com'
 
 		$(".dropzone-container[data-file-upload='yes']").dropzone({ 
 			url: s3URL,

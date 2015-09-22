@@ -21,6 +21,9 @@
 		<dependency version="1.31">jit_image_manipulation</dependency>
 	</dependencies>
 	<releases>
+		<release version="1.2.2" date="2015-08-15" min="2.5">
+			- Add support for Custom Endpoints for File Uploads
+		</release>
 		<release version="1.2.1" date="2015-08-15" min="2.5">
 			- Add support for Custom Endpoints
 			- Add Region support for S3 image upload field

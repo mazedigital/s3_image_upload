@@ -76,6 +76,13 @@
 			return $name . $postfix . substr($filename, $extension_pos);
 		}
 
+		private function setEndpoint($s3ObjectUrl){
+			$customEndpoint = $this->get('custom_endpoint');
+			if ($customEndpoint == "yes"){
+				return str_replace("https://s3.amazonaws.com/" . $this->get('bucket') , "http://" . $this->get('bucket'), $s3ObjectUrl);
+			} else return $s3ObjectUrl;
+		}
+
 		public function processRawFieldData($data, &$status, &$message = null, $simulate = false, $entry_id = null){
 			$status = self::__OK__;
 			// all uploads to be done via Javascript makes life simple :)
@@ -221,7 +228,7 @@
 				$wrapper->setAttribute('data-filenumber',sizeof($data['filename']));
 				$previewContent = '';
 				foreach ($data['filename'] as $key => $value) {
-					$filesrc = $this->s3Client->getObjectUrl($this->get('bucket'),  $data['filepath'][$key]);
+					$filesrc = $this->setEndpoint($this->s3Client->getObjectUrl($this->get('bucket'),  $data['filepath'][$key]));
 
 					$fileType = 'file';
 					$previewImage = '';
@@ -253,7 +260,7 @@
 		function prepareTableValue($data, XMLElement $link=NULL, $entry_id = NULL){
 
 			if (isset($entry_id) && isset($data['filename'])) {
-				$url = $this->s3Client->getObjectUrl($this->get('bucket'), $data['filepath']);
+				$url = $this->setEndpoint($this->s3Client->getObjectUrl($this->get('bucket'), $data['filepath']));
 
 				$file = '<a href="' . $url . '">'.$data['filename'].'</a>>';
 			} else {
@@ -277,10 +284,18 @@
 
 		public function appendFormattedElement(&$wrapper, $data, $encode = false) {
 			
+			if (empty($data)) return;
+
 			$element = new XMLElement($this->get('element_name'));
 
+			if (!is_array($data['filename'])){
+				$data['filename'] = array($data['filename']);
+				$data['mimetype'] = array($data['mimetype']);
+				$data['filepath'] = array($data['filepath']);
+			}
+
 			foreach ($data['filename'] as $key => $value) {
-				$filesrc = $this->s3Client->getObjectUrl($this->get('bucket'),  $data['filepath'][$key]);
+				$filesrc = $this->setEndpoint($this->s3Client->getObjectUrl($this->get('bucket'),  $data['filepath'][$key]));
 
 				$file = new XMLElement('file',null,array('source'=>$filesrc,'mimetype'=> $data['mimetype'][$key]));
 				$element->appendChild($file);

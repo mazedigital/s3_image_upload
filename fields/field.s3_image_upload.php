@@ -694,7 +694,8 @@
 				'crop_dimensions',
 				'min_width',
 				'min_height',
-				'crop_ui'
+				'crop_ui',
+				'region'
 			);
 			foreach ($all_fields as $field) {
 				$value = $this->get($field);
