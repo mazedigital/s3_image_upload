@@ -3,8 +3,9 @@
 	$(document).ready(function(){
 		
 		var fieldPrefix = $('.field-s3_file_upload').data('field-name');
-		var region = $('.field-s3_file_upload').data('region') + '.';
+		var region = $('.field-s3_file_upload').data('region');
 		if (region == 'us-east-1') region = '';
+		if ( region != '')  region += '.';
 
 		var s3URL = 'http://'+$('.field-s3_file_upload').data('bucket')+'.s3.'+region+'amazonaws.com'
 
