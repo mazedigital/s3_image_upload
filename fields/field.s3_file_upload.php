@@ -297,7 +297,7 @@
 			foreach ($data['filename'] as $key => $value) {
 				$filesrc = $this->setEndpoint($this->s3Client->getObjectUrl($this->get('bucket'),  $data['filepath'][$key]));
 
-				$file = new XMLElement('file',null,array('source'=>$filesrc,'name'=>$value,'mimetype'=> $data['mimetype'][$key]));
+				$file = new XMLElement('file',null,array('source'=>$filesrc,'name'=>General::sanitize($value),'mimetype'=> $data['mimetype'][$key]));
 				$element->appendChild($file);
 			}
 
