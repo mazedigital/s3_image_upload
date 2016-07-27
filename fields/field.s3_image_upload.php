@@ -791,7 +791,7 @@
 					$originalImgName = $this->getOriginalImgName($data['filename']);
 					$style = "left:{$cropData[0]}%;top:{$cropData[1]}%;width:{$cropData[2]}%;height:{$cropData[3]}%;";
 					$html = "<div class='image-wrap pre-upload'>".
-					  "<img id='source-img' src='". $this->s3Client->getObjectUrl($this->get('bucket'), $originalImgName) ."' crossOrigin='crossOrigin' data-dz-thumbnail='data-dz-thumbnail'/>".
+					  "<img id='source-img' src='". $this->s3Client->getObjectUrl($this->get('bucket'), $originalImgName) ."?".time()."' crossOrigin='crossOrigin' data-dz-thumbnail='data-dz-thumbnail'/>".
 					  "<div class='grid' style='". $style ."'>".
 						"<div class='row' data-row='1'>".
 						  "<div class='col' data-pos='crop-left crop-top' data-jit='1'></div>".
