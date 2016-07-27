@@ -787,7 +787,7 @@
 			if ($this->get('crop_ui') == 'yes'){
 
 				if ($data['crop_instructions']){
-					$imgsrc = $this->s3Client->getObjectUrl($this->get('bucket'),  $this->filenamePrefix($data['filename'],'cropped'));
+					$imgsrc = $this->s3Client->getObjectUrl($this->get('bucket'),  $this->filenamePrefix($data['filename'],'cropped'))."?".time();
 					$originalImgName = $this->getOriginalImgName($data['filename']);
 					$style = "left:{$cropData[0]}%;top:{$cropData[1]}%;width:{$cropData[2]}%;height:{$cropData[3]}%;";
 					$html = "<div class='image-wrap pre-upload'>".
