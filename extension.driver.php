@@ -55,6 +55,7 @@
 					`crop_ui` enum('yes','no'),
 					`custom_endpoint` enum('yes','no') DEFAULT 'no',
 					`region` varchar(50) NOT NULL,
+					`expires` varchar(50) NOT NULL,
 					PRIMARY KEY  (`id`),
 					KEY `field_id` (`field_id`)
 				) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -65,6 +66,7 @@
 					`bucket` varchar(50) NOT NULL,
 					`key_prefix` varchar(50) NOT NULL,
 					`region` varchar(50) NOT NULL,
+					`expires` varchar(50) NOT NULL,
 					`acl` varchar(50) NOT NULL,
 					`custom_endpoint` enum('yes','no') DEFAULT 'no',
 					PRIMARY KEY  (`id`),
@@ -76,21 +78,10 @@
 
 		public function update($previousVersion){
 
-			if(version_compare($previousVersion, '1.2.2', '<')) {
-				$status[] = Symphony::Database()->query("
-					ALTER TABLE `tbl_fields_s3_file_upload`
-					ADD `custom_endpoint` enum('yes','no') DEFAULT 'no'
-				");
-			}
-
-			if(version_compare($previousVersion, '1.2.1', '<')) {
+			if(version_compare($previousVersion, '1.1', '<')) {
 				$status[] = Symphony::Database()->query("
 					ALTER TABLE `tbl_fields_s3_image_upload`
-					ADD `custom_endpoint` enum('yes','no') DEFAULT 'no'
-				");
-				$status[] = Symphony::Database()->query("
-					ALTER TABLE `tbl_fields_s3_image_upload`
-					ADD `region` varchar(50) NOT NULL
+					ADD `crop_ui` enum('yes','no') DEFAULT 'yes'
 				");
 			}
 
@@ -109,10 +100,32 @@
 				");
 			}
 
-			if(version_compare($previousVersion, '1.1', '<')) {
+			if(version_compare($previousVersion, '1.2.1', '<')) {
 				$status[] = Symphony::Database()->query("
 					ALTER TABLE `tbl_fields_s3_image_upload`
-					ADD `crop_ui` enum('yes','no') DEFAULT 'yes'
+					ADD `custom_endpoint` enum('yes','no') DEFAULT 'no'
+				");
+				$status[] = Symphony::Database()->query("
+					ALTER TABLE `tbl_fields_s3_image_upload`
+					ADD `region` varchar(50) NOT NULL
+				");
+			}
+
+			if(version_compare($previousVersion, '1.2.2', '<')) {
+				$status[] = Symphony::Database()->query("
+					ALTER TABLE `tbl_fields_s3_file_upload`
+					ADD `custom_endpoint` enum('yes','no') DEFAULT 'no'
+				");
+			}
+
+			if(version_compare($previousVersion, '1.3', '<')) {
+				$status[] = Symphony::Database()->query("
+					ALTER TABLE `tbl_fields_s3_image_upload`
+					ADD `expires` varchar(50) NOT NULL
+				");
+				$status[] = Symphony::Database()->query("
+					ALTER TABLE `tbl_fields_s3_file_upload`
+					ADD `expires` varchar(50) NOT NULL
 				");
 			}
 		}

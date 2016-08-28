@@ -99,7 +99,7 @@ class eventgenerate_s3_signature extends Event
         
         // Prepare the filename
         $fileName = General::createHandle($file['filename'],50) . '-' . time();
-        $key = $field->get('key_prefix') . '/'.$fileName.'.'.$file['extension'];
+        $key = $field->get('key_prefix') . $file['dirname'] . '/'.$fileName.'.'.$file['extension'];
         
         // Set the expiration time of the policy
         $policyExpiration = gmdate('Y-m-d\TH:i:s\Z', strtotime('+1 hour'));

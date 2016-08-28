@@ -27,16 +27,23 @@
 
 		private function initializeClient(){
 
+			// Instantiate an S3 client
 			if (!$this->s3Client){
 
 				// Instantiate an S3 client
-				$this->s3Client = S3Client::factory(array(
-					'key'    => Symphony::Configuration()->get('access-key-id', 's3_image_upload'),
-					'secret' => Symphony::Configuration()->get('secret-access-key', 's3_image_upload'),
-					'region' => $this->get('region'),
-				));
+				$this->s3Client = new S3Client(
+					array(
+						'version' => '2006-03-01',
+						'region' =>  ($this->get('region') ? $this->get('region') :'') ,
+						'credentials' => array(
+							'key' => Symphony::Configuration()->get('access-key-id', 's3_image_upload'),
+							'secret'  => Symphony::Configuration()->get('secret-access-key', 's3_image_upload'),
+						)
+					)
+				);
 			}
 		}
+
 
 		function canFilter(){
 			return true;

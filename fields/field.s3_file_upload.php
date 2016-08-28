@@ -17,11 +17,26 @@
 			$this->_showcolumn = true;
 			$this->_multiple = false;
 
+		}
+
+
+		private function initializeClient(){
+
 			// Instantiate an S3 client
-			$this->s3Client = S3Client::factory(array(
-			    'key'    => Symphony::Configuration()->get('access-key-id', 's3_image_upload'),
-			    'secret' => Symphony::Configuration()->get('secret-access-key', 's3_image_upload'),
-			));
+			if (!$this->s3Client){
+
+				// Instantiate an S3 client
+				$this->s3Client = new S3Client(
+					array(
+						'version' => '2006-03-01',
+						'region' =>  ($this->get('region') ? $this->get('region') :'') ,
+						'credentials' => array(
+							'key' => Symphony::Configuration()->get('access-key-id', 's3_image_upload'),
+							'secret'  => Symphony::Configuration()->get('secret-access-key', 's3_image_upload'),
+						)
+					)
+				);
+			}
 		}
 
 		function canFilter(){
@@ -179,7 +194,7 @@
 					`entry_id` int(11) unsigned NOT NULL,
 					`filename` varchar(255) NOT NULL,
 					`filepath` varchar(255) NOT NULL,
-              		`mimetype` varchar(100) default null,
+					`mimetype` varchar(100) default null,
 					PRIMARY KEY  (`id`),
 					KEY `entry_id` (`entry_id`),
 					KEY `filepath` (`filepath`),
@@ -189,6 +204,8 @@
 		}
 
 		function displayPublishPanel(&$wrapper, $data=NULL, $flagWithError=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL, $entry_id) {
+
+			$this->initializeClient();
 
 			// append assets
 			$assets_path = '/extensions/s3_image_upload/assets/';
@@ -228,7 +245,8 @@
 				$wrapper->setAttribute('data-filenumber',sizeof($data['filename']));
 				$previewContent = '';
 				foreach ($data['filename'] as $key => $value) {
-					$filesrc = $this->setEndpoint($this->s3Client->getObjectUrl($this->get('bucket'),  $data['filepath'][$key]));
+
+					$filesrc = $this->setEndpoint($this->s3Client->getObjectUrl($this->get('bucket'),  $data['filepath'][$key],$this->get('expires')));
 
 					$fileType = 'file';
 					$previewImage = '';
@@ -258,9 +276,10 @@
 		}
 
 		function prepareTableValue($data, XMLElement $link=NULL, $entry_id = NULL){
+			$this->initializeClient();
 
 			if (isset($entry_id) && isset($data['filename'])) {
-				$url = $this->setEndpoint($this->s3Client->getObjectUrl($this->get('bucket'), $data['filepath']));
+				$url = $this->setEndpoint($this->s3Client->getObjectUrl($this->get('bucket'), $data['filepath'],$this->get('expires')));
 
 				$file = '<a href="' . $url . '">'.$data['filename'].'</a>>';
 			} else {
@@ -286,6 +305,8 @@
 			
 			if (empty($data)) return;
 
+			$this->initializeClient();
+
 			$element = new XMLElement($this->get('element_name'));
 
 			if (!is_array($data['filename'])){
@@ -295,9 +316,15 @@
 			}
 
 			foreach ($data['filename'] as $key => $value) {
-				$filesrc = $this->setEndpoint($this->s3Client->getObjectUrl($this->get('bucket'),  $data['filepath'][$key]));
+				$filesrc = $this->setEndpoint(
+						$this->s3Client->getObjectUrl(
+							$this->get('bucket'),  
+							$data['filepath'][$key],
+							$this->get('expires')
+						)
+					);
 
-				$file = new XMLElement('file',null,array('source'=>$filesrc,'name'=>General::sanitize($value),'mimetype'=> $data['mimetype'][$key]));
+				$file = new XMLElement('file',null,array('source'=>$filesrc,'name'=>General::sanitize($value),'mimetype'=> $data['mimetype'][$key],'filepath'=> $data['filepath'][$key]));
 				$element->appendChild($file);
 			}
 

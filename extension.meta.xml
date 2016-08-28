@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <extension id="s3_image_upload" status="released" xmlns="http://symphony-cms.com/schemas/extension/1.0">
 	<name>Field: S3 Image Upload</name>
-	<description>S3 Image Uploads, with cropping and resizing functionality.</description>
-	<repo type="github">https://github.com/jonmifsud/s3_image_upload</repo>
+	<description>S3 Image Uploads, with cropping and resizing functionality. + an additional S3 File Upload Field</description>
+	<repo type="github">https://github.com/mazedigital/s3_image_upload</repo>
 	<types>
 		<type>Field</type>
 		<type>Workflow</type>
@@ -13,14 +13,19 @@
 	<authors>
 		<author>
 			<name github="jonmifsud" symphony="gunglien">Jonathan Mifsud</name>
-			<email>info@jonmifsud.com</email>
-			<website>http://jonmifsud.com</website>
+			<email>jon@maze.digital</email>
+			<website>http://maze.digital</website>
 		</author>
 	</authors>
 	<dependencies>
 		<dependency version="1.31">jit_image_manipulation</dependency>
 	</dependencies>
 	<releases>
+		<release version="1.3" date="2016-08-28" min="2.5">
+			- Add expires header to support private file uploads
+			- Fix File upload to show correct region based urls
+			- Update S3 SDK to v3
+		</release>
 		<release version="1.2.2" date="2015-08-15" min="2.5">
 			- Add support for Custom Endpoints for File Uploads
 		</release>
