@@ -76,6 +76,59 @@
 			return $image;
 		}
 
+		/**
+		 * Given a path to an image, `$image`, this function will verify it's
+		 * existence, and generate a resource for use with PHP's image functions
+		 * based off the file's type (.gif, .jpg, .png).
+		 * Images must be RGB, CMYK jpg's are not supported due to GD limitations.
+		 *
+		 * @param string $image
+		 *  The path to the file
+		 * @return Image
+		 */
+		public static function loadFile($image){
+			if(!is_file($image) || !is_readable($image)){
+				throw new Exception(sprintf('Error loading image <code>%s</code>. Check it exists and is readable.', str_replace(DOCROOT, '', $image)));
+			}
+
+			$meta = self::getMetaInformation($image);
+
+			switch($meta->type) {
+				// GIF
+				case IMAGETYPE_GIF:
+					$resource = imagecreatefromgif($image);
+					break;
+
+				// JPEG
+				case IMAGETYPE_JPEG:
+					if($meta->channels <= 3){
+						$resource = imagecreatefromjpeg($image);
+					}
+					// Can't handle CMYK JPEG files
+					else{
+						throw new Exception('Cannot load CMYK JPG images');
+					}
+					break;
+
+				// PNG
+				case IMAGETYPE_PNG:
+					$resource = imagecreatefrompng($image);
+					break;
+
+				default:
+					throw new Exception('Unsupported image type. Supported types: GIF, JPEG and PNG');
+					break;
+			}
+
+			if(!is_resource($resource)){
+				throw new Exception(sprintf('Error creating image <code>%s</code>. Check it exists and is readable.', str_replace(DOCROOT, '', $image)));
+			}
+
+			$obj = new self($resource, $meta);
+
+			return $obj;
+		}
+
 		public static function load($imageResource,$type){
 			$rgb = imagecolorat($imageResource, 1, 1);
 			$colors = imagecolorsforindex($imageResource, $rgb);
