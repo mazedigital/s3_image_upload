@@ -1003,8 +1003,8 @@
 			$element->appendChild($dimensions);
 
 			$element->setAttributeArray(array(
-				// 'width' => $data['width'],
-				// 'height' => $data['height'],
+				'width' => $data['width'],
+				'height' => $data['height'],
 				'crop-position' => $data['crop_position'],
 				'original' => $this->setEndpoint($this->s3Client->getObjectUrl($this->get('bucket'),$this->getOriginalImgName($data['filename']))),
 				'original-key' => $this->getOriginalImgName($data['filename'])
