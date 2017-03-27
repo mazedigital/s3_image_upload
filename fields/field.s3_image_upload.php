@@ -154,9 +154,44 @@
 			 */
 			$message = null;
 
+			if (!empty($data['image']) && is_array($data['image'])){
+
+		        if (@is_uploaded_file($data['image']['tmp_name'])) {
+					$file = $data['image']['tmp_name'];
+					$mimetype = General::getMimeType($file);
+					$meta = FieldUpload::getMetaInfo($file, $mimetype);
+
+					if (!is_numeric($data['width'])){
+						$data['width'] = 100;
+					}
+					if (!is_numeric($data['height'])){
+						$data['height'] = 100;
+					}
+
+					//get width and height and multiply by size of the crop by the UI to get final width/height
+					$width = round($meta['width'] * $data['width'] / 100);
+					$height = round($meta['width'] * $data['height'] / 100);
+
+					//TODO confirm that the min_width/min_height work properly
+					if($this->get('min_width') > $width){
+						$message = __('"%1$s" needs to have a width of at least %2$spx.', array($this->get('label'), $this->get('min_width')));
+						return self::__INVALID_FIELDS__;
+					}
+
+					if($this->get('min_height') > $height){
+						$message = __('"%1$s" needs to have a height of at least %2$spx.', array($this->get('label'), $this->get('min_height')));
+						return self::__INVALID_FIELDS__;
+					}
+
+		        } else {
+		        	$message = __('Unable to process image.');
+					return self::__INVALID_FIELDS__;
+		        }
+
+			}
 
 			//fetch original image data
-			if (!empty($data['image'])){
+			if (!empty($data['image']) && is_string($data['image'])){
 				$imgstr = $data['image'];
 				$new_data=explode(";",$imgstr);
 				$type=$new_data[0];
@@ -171,7 +206,7 @@
 					$data['height'] = 100;
 				}
 
-				//get width and height and multiply by size of the crop by hte UI to get final width/height
+				//get width and height and multiply by size of the crop by the UI to get final width/height
 				$width = round(imagesx($imageResource) * $data['width'] / 100);
 				$height = round(imagesy($imageResource) * $data['height'] / 100);
 
@@ -464,7 +499,17 @@
 		private function processImage($data,$filename=null){
 			$this->initializeClient();
 
-			if ($data['image']){
+
+			if (!empty($data['image']) && is_array($data['image'])){
+
+				$this->image = ResourceImage::loadFile($data['image']['tmp_name']);
+
+				// unlink the image to keep filesystem clean
+				unlink($data['image']['tmp_name']);
+				unset($data['image']);
+
+			} elseif (!empty($data['image']) && is_string($data['image'])){
+
 				$imgstr = $data['image'];
 	
 				$new_data=explode(";",$imgstr);
