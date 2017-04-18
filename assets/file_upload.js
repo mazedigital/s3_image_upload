@@ -1,4 +1,5 @@
 
+
 (function($){
 	$(document).ready(function(){
 		
@@ -7,7 +8,7 @@
 		if (region == 'us-east-1') region = '';
 		if ( region != '')  region += '.';
 
-		var s3URL = 'http://'+$('.field-s3_file_upload').data('bucket')+'.'+region+'amazonaws.com'
+		var s3URL = '//'+$('.field-s3_file_upload').data('bucket')+'.s3-'+region+'amazonaws.com';
 
 		$(".dropzone-container[data-file-upload='yes']").dropzone({ 
 			url: s3URL,
@@ -15,17 +16,21 @@
 			method: "post",
 			autoProcessQueue: true,
 			maxfiles: 999,
+			acceptedFiles: 'image/*, .jpg, .gif, .png, .tiff, .mp3, .wav, .mp4, .mov, .pdf, .doc, .docx, .txt, .avi, .mpg, .wmv ',
 			parallelUploads: 2,
 			clickable: '.dropzone-click',
 			dictDefaultMessage: "Drop files here to upload - Maximum Size : 100MB",
 			previewsContainer: '.dropzone-previews',
 			previewTemplate: '<div class="dz-preview dz-file-preview">'+
+//								'<button id="hifive" class="btn btn-primary">TEST</button>'+
 								'<div class="dz-details">'+
 									'<img data-dz-thumbnail />'+
 									'<div class="dz-text-details">'+
 										'<div class="dz-filename"><span data-dz-name></span></div>'+
 										'<div class="dz-size" data-dz-size></div>'+
 									'</div>'+
+									'<a id="delete_file_progress" href="javascript:void(0)"> Delete </a>'+
+									
 								'</div>'+
 								'<div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>'+
 								'<div class="dz-success-mark"><span>✔</span></div>'+
@@ -41,6 +46,7 @@
 					dataType: 'json',
 					success: function(response)
 					{
+							$(".dropzone-container").hide();
 						file.custom_status = 'ready';
 						file.postData = response;
 						$(file.previewTemplate).addClass('uploading');
@@ -137,3 +143,46 @@
 	});
 
 })(jQuery);
+
+jQuery(function($) {
+
+function removeEliment(){
+		
+	$("input[name^='fields[file][mimetype]']").remove();
+	$("input[name^='fields[file][filepath]']").remove();
+	$("input[name^='fields[file][filename]']").remove();
+	$(".dz-preview").remove();
+
+}
+$(document).on('click','#delete_file_progress',function(){
+	
+		removeEliment();
+
+	 	$(".dropzone-container").show();
+});
+
+
+
+$(document).ready(function(){
+	
+	
+		if( $('.dz-preview').length )
+		{
+			$(".dropzone-container").hide();
+		}else{
+			$(".dropzone-container").show();
+		}
+	
+	
+    $("#delete_file").click(function(){		
+			$(".dz-preview").remove();
+			$('.file-preview').find('input').remove();
+			$(".dropzone-container").show();
+    } );   
+	
+	
+	
+	
+});
+	
+});
