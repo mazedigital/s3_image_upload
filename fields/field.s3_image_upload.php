@@ -385,7 +385,7 @@
 		public function cropMissingDimensions($crop_position,$cropDimensions,$filename){
 
 			$this->initializeClient();
-			$this->image = ResourceImage::loadExternal( $this->s3Client->getObjectUrl($this->get('bucket'), $this->filenamePrefix($filename,'cropped')) );
+			$this->image = ResourceImage::loadExternal( $this->getObjectUrl($this->get('bucket'), $this->filenamePrefix($filename,'cropped')) );
 
 			if (empty($crop_position)){
 				$jit_position = 1;
@@ -606,7 +606,7 @@
 						if ($result['crop_position'] != $data['crop_position'] || $result['crop_instructions'] != implode(',', array($data['left'],$data['top'],$data['width'],$data['height']))){
 							$result['crop_position'] = $data['crop_position'];
 							$result['crop_instructions'] = implode(',', array($data['left'],$data['top'],$data['width'],$data['height']));
-							$this->image = ResourceImage::loadExternal( $this->s3Client->getObjectUrl($this->get('bucket'), $this->getOriginalImgName($result['filename'])) );
+							$this->image = ResourceImage::loadExternal( $this->getObjectUrl($this->get('bucket'), $this->getOriginalImgName($result['filename'])) );
 							$this->cropImage($data,$result['filename']);
 							$result['supported_dimensions'] = $data['crop_dimensions'];
 						}
@@ -839,11 +839,11 @@
 			if ($this->get('crop_ui') == 'yes'){
 
 				if ($data['crop_instructions']){
-					$imgsrc = $this->s3Client->getObjectUrl($this->get('bucket'),  $this->filenamePrefix($data['filename'],'cropped'));
+					$imgsrc = $this->getObjectUrl($this->get('bucket'),  $this->filenamePrefix($data['filename'],'cropped'));
 					$originalImgName = $this->getOriginalImgName($data['filename']);
 					$style = "left:{$cropData[0]}%;top:{$cropData[1]}%;width:{$cropData[2]}%;height:{$cropData[3]}%;";
 					$html = "<div class='image-wrap pre-upload'>".
-					  "<img id='source-img' src='". $this->s3Client->getObjectUrl($this->get('bucket'), $originalImgName) ."' crossOrigin='crossOrigin' data-dz-thumbnail='data-dz-thumbnail'/>".
+					  "<img id='source-img' src='". $this->getObjectUrl($this->get('bucket'), $originalImgName) ."' crossOrigin='crossOrigin' data-dz-thumbnail='data-dz-thumbnail'/>".
 					  "<div class='grid' style='". $style ."'>".
 						"<div class='row' data-row='1'>".
 						  "<div class='col' data-pos='crop-left crop-top' data-jit='1'></div>".
@@ -889,7 +889,7 @@
 				$imagePreviewContainer->appendChild(new XMLElement('div',"<img src='{$imgsrc}' class='{$data['crop_position']}'/>",array('class'=>'portrait-preview')));
 			} else {
 				if ($data['crop_instructions']){
-					$imgsrc = $this->s3Client->getObjectUrl($this->get('bucket'),  $this->filenamePrefix($data['filename'],'cropped'));
+					$imgsrc = $this->getObjectUrl($this->get('bucket'),  $this->filenamePrefix($data['filename'],'cropped'));
 					$previewContent = "<div class='image-wrap pre-upload'><img src='{$imgsrc}' class='{$data['crop_position']}' data-dz-thumbnail='data-dz-thumbnail' /></div>";
 				}	
 				
@@ -903,7 +903,7 @@
 			$this->initializeClient();
 
 			if (isset($entry_id) && isset($data['filename'])) {
-				$url = $this->s3Client->getObjectUrl($this->get('bucket'), $this->filenamePrefix($data['filename'],'50x50'));
+				$url = $this->getObjectUrl($this->get('bucket'), $this->filenamePrefix($data['filename'],'50x50'));
 
 				$image = '<img style="vertical-align: middle;" src="' . $url . '" alt="'.$this->get('label').' of Entry '.$entry_id.'"/>';
 			} else {
@@ -930,6 +930,11 @@
 			if ($customEndpoint == "yes"){
 				return str_replace("https://s3.amazonaws.com/" . $this->get('bucket') , "http://" . $this->get('bucket'), $s3ObjectUrl);
 			} else return $s3ObjectUrl;
+		}
+
+		private function getObjectUrl($bucket,$filename){
+
+			return "https://s3.amazonaws.com/" . $bucket .'/'. $filename;
 		}
 
 		public function appendFormattedElement(&$wrapper, $data, $encode = false) {
@@ -964,7 +969,7 @@
 				$dimensions->appendChild(
 					new XMLElement(
 						'image',
-						$this->setEndpoint($this->s3Client->getObjectUrl(
+						$this->setEndpoint($this->getObjectUrl(
 							$this->get('bucket'),
 							$this->filenamePrefix(
 								$data['filename'],
@@ -985,7 +990,7 @@
 			$dimensions->appendChild(
 				new XMLElement(
 					'image',
-					$this->setEndpoint($this->s3Client->getObjectUrl(
+					$this->setEndpoint($this->getObjectUrl(
 						$this->get('bucket'),
 						$this->filenamePrefix(
 							$data['filename'],
@@ -1002,11 +1007,13 @@
 
 			$element->appendChild($dimensions);
 
+			// die('here');
+
 			$element->setAttributeArray(array(
 				'width' => $data['width'],
 				'height' => $data['height'],
 				'crop-position' => $data['crop_position'],
-				'original' => $this->setEndpoint($this->s3Client->getObjectUrl($this->get('bucket'),$this->getOriginalImgName($data['filename']))),
+				'original' => $this->setEndpoint($this->getObjectUrl($this->get('bucket'),$this->getOriginalImgName($data['filename']))),
 				'original-key' => $this->getOriginalImgName($data['filename'])
 			));
 
