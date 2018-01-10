@@ -925,10 +925,18 @@
 			return $data['filename'];
 		}
 
+
 		private function setEndpoint($s3ObjectUrl){
 			$customEndpoint = $this->get('custom_endpoint');
 			if ($customEndpoint == "yes"){
-				return str_replace("https://s3.amazonaws.com/" . $this->get('bucket') , "http://" . $this->get('bucket'), $s3ObjectUrl);
+				$customURL = "http://" . $this->get('bucket');
+
+				$endpoints = Symphony::Configuration()->get('custom_endpoints', 's3_image_upload');
+				if ($endpoints[$this->get('bucket')]){
+					$customURL = $endpoints[$this->get('bucket')];
+				}
+
+				return str_replace("https://s3.amazonaws.com/" . $this->get('bucket') , $customURL , $s3ObjectUrl);
 			} else return $s3ObjectUrl;
 		}
 
