@@ -97,6 +97,10 @@ class eventgenerate_s3_signature extends Event
             return false;
         }
         
+        if ($file['dirname'] == "."){
+            $file['dirname'] = "";
+        }
+
         // Prepare the filename
         $fileName = General::createHandle($file['filename'],50) . '-' . time();
         $key = $field->get('key_prefix') . $file['dirname'] . '/'.$fileName.'.'.$file['extension'];
