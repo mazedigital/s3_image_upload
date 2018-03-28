@@ -7,7 +7,7 @@
 		if (region == 'us-east-1') region = '';
 		if ( region != '')  region += '.';
 
-		var s3URL = 'http://'+$('.field-s3_file_upload').data('bucket')+'.'+region+'amazonaws.com'
+		var s3URL = '//'+$('.field-s3_file_upload').data('bucket')+'.'+region+'amazonaws.com'
 
 		$(".dropzone-container[data-file-upload='yes']").dropzone({ 
 			url: s3URL,
