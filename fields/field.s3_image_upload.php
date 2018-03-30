@@ -941,8 +941,13 @@
 		}
 
 		private function getObjectUrl($bucket,$filename){
-
-			return "https://s3.amazonaws.com/" . $bucket .'/'. $filename;
+			$customEndpoint = $this->get('custom_endpoint');
+			$endpoints = Symphony::Configuration()->get('custom_endpoints', 's3_image_upload');
+			if ($customEndpoint == "yes" && $endpoints[$this->get('bucket')]){
+				return $customURL = $endpoints[$this->get('bucket')] .'/'. $filename;
+			} else {
+				return "https://s3.amazonaws.com/" . $bucket .'/'. $filename;
+			}
 		}
 
 		public function appendFormattedElement(&$wrapper, $data, $encode = false) {
