@@ -68,7 +68,7 @@
 					break;
 			}
 
-			$image = self::load(imagecreatefromstring($response),$type);
+			$image = self::loadImage(imagecreatefromstring($response),$type);
 
 			// clean up
 			$gateway->flush();
@@ -129,7 +129,7 @@
 			return $obj;
 		}
 
-		public static function load($imageResource,$type){
+		public static function loadImage($imageResource,$type){
 			$rgb = imagecolorat($imageResource, 1, 1);
 			$colors = imagecolorsforindex($imageResource, $rgb);
 
