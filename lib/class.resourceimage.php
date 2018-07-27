@@ -129,27 +129,27 @@
 			return $obj;
 		}
 
-		public static function load($imageResource,$type){
-			$rgb = imagecolorat($imageResource, 1, 1);
-			$colors = imagecolorsforindex($imageResource, $rgb);
+		public static function load($image){
+			$rgb = imagecolorat($image, 1, 1);
+			$colors = imagecolorsforindex($image, $rgb);
 
 			$meta = array();
-			$meta['width'] = imagesx($imageResource);
-			$meta['height'] = imagesy($imageResource);
+			$meta['width'] = imagesx($image);
+			$meta['height'] = imagesy($image);
 			$meta['channels'] = count($colors);
 			// header("Content-type:".$type);
 
 			switch($type) {
 				// GIF
 				case 'data:image/gif':
-					// imagegif($imageResource);
+					// imagegif($image);
 					$meta['type'] = IMAGETYPE_GIF;
 					break;
 
 				// JPEG
 				case 'data:image/jpeg':
 					if($meta['channels'] <= 3 || ($meta['channels'] == 4 && $colors['alpha'] == null )){
-						// imagejpeg($imageResource);
+						// imagejpeg($image);
 						$meta['type'] = IMAGETYPE_JPEG;
 					}
 					// Can't handle CMYK JPEG files
@@ -161,17 +161,18 @@
 				// PNG
 				case 'data:image/png':
 					$meta['type'] = IMAGETYPE_PNG;
-					imagealphablending($imageResource, false);
-					imagesavealpha($imageResource, true);
-					// imagepng($imageResource);
+					imagealphablending($image, false);
+					imagesavealpha($image, true);
+					// imagepng($image);
 					break;
 
 				default:
+		
 					throw new Exception('Unsupported image type. Supported types: GIF, JPEG and PNG');
 					break;
 			}
 
-			$obj = new self($imageResource, (object)$meta);
+			$obj = new self($image, (object)$meta);
 
 			return $obj;
 		}

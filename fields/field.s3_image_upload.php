@@ -624,7 +624,7 @@
 			return $data;
 		}
 
-		function displaySettingsPanel(&$wrapper, $errors=NULL) {
+		function displaySettingsPanel(XMLElement &$wrapper, $errors = NULL) {
 			parent::displaySettingsPanel($wrapper, $errors);
 
 			// get current section id
@@ -716,7 +716,7 @@
 			$wrapper->appendChild($column);
 		}
 
-		function checkFields(&$errors, $checkForDuplicates=true) {
+		function checkFields(array &$errors, $checkForDuplicates = true) {
 
 			// check if min fields are integers
 			$min_fields = array('min_width', 'min_height');
@@ -779,7 +779,7 @@
 			");
 		}
 
-		function displayPublishPanel(&$wrapper, $data=NULL, $flagWithError=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL, $entry_id) {
+		function displayPublishPanel(XMLElement &$wrapper, $data = NULL, $flagWithError = NULL, $fieldnamePrefix = NULL, $fieldnamePostfix = NULL, $entry_id = NULL) {
 			
 			$this->initializeClient();
 			//TODO create error
@@ -917,7 +917,7 @@
 
 		}
 
-		function prepareReadableValue($data, $entry_id){
+		function prepareReadableValue($data, $entry_id = NULL, $truncate = false, $defaultValue = NULL){
 			return $this->preparePlainTextValue($data, $entry_id);
 		}
 
@@ -950,7 +950,7 @@
 			}
 		}
 
-		public function appendFormattedElement(&$wrapper, $data, $encode = false) {
+		public function appendFormattedElement(XMLElement &$wrapper, $data, $encode = false, $mode = NULL, $entry_id = NULL) {
 			$this->initializeClient();
 			
 			$element = new XMLElement($this->get('element_name'));
