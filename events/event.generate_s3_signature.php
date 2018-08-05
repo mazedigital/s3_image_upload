@@ -1,5 +1,7 @@
 <?php
 
+    require_once( EXTENSIONS . '/s3_image_upload/vendor/autoload.php');
+
 class eventgenerate_s3_signature extends Event
 {
     public $ROOTELEMENT = 'generate-s3-signature';
@@ -96,79 +98,41 @@ class eventgenerate_s3_signature extends Event
         if (!$file) {
             return false;
         }
-        
+
+
         // Prepare the filename
-        $fileName = General::createHandle($file['filename'],50) . '-' . time();
+        $fileName = Lang::createHandle($file['filename'],50) . '-' . time();
         $key = $field->get('key_prefix') . $file['dirname'] . '/'.$fileName.'.'.$file['extension'];
-        
-        // Set the expiration time of the policy
-        $policyExpiration = gmdate('Y-m-d\TH:i:s\Z', strtotime('+1 hour'));
 
+        // new code
 
-        $algorithm = "AWS4-HMAC-SHA256";
-        $service = "s3";
-        $date = gmdate('Ymd\THis\Z');
-        $shortDate = gmdate('Ymd');
-        $requestType = "aws4_request";
-        $expires = '3600'; // 1 Hour
-        $successStatus = '201';
+        $credentials = new Aws\Credentials\Credentials( 
+                Symphony::Configuration()->get('access-key-id', 's3_image_upload'), 
+                Symphony::Configuration()->get('secret-access-key', 's3_image_upload')
+            );
 
-        $scope = [
-            $AWSkey,
-            $shortDate,
-            $AWSregion,
-            $service,
-            $requestType
-        ];
-        $credentials = implode('/', $scope);
-        
-        // Set the policy
-        $policy = [
-            'expiration' => $policyExpiration,
-            'conditions' => [
-                ['bucket' => $AWSbucket],
-                ['acl' => $acl],
-                ['starts-with', '$key', ''],
-                ['starts-with', '$Content-Type', $contentType],
-                ['success_action_status' => '201'],
-                ['x-amz-credential' => $credentials],
-                ['x-amz-algorithm' => $algorithm],
-                ['x-amz-date' => $date],
-                ['x-amz-expires' => $expires]
-            ]
-        ];
-        
-        // 1 - Encode the policy using UTF-8.
-        // 2 - Encode those UTF-8 bytes using Base64.
-        // 3 - Sign the policy with your Secret Access Key using HMAC SHA-1.
-        // 4 - Encode the SHA-1 signature using Base64.
-        
-        // Prepare the signature
-        $base64Policy = base64_encode(json_encode($policy));
+        $client = new \Aws\S3\S3Client([
+            'version' => 'latest',
+            'region' => $AWSregion,
+            'credentials' => $credentials,
+        ]);
 
-        $signature = base64_encode(hash_hmac('sha1', $b64, $AWSsecret, true));
-
-        // Signing Keys
-        $dateKey = hash_hmac('sha256', $shortDate, 'AWS4' . $AWSsecret, true);
-        $dateRegionKey = hash_hmac('sha256', $AWSregion, $dateKey, true);
-        $dateRegionServiceKey = hash_hmac('sha256', $service, $dateRegionKey, true);
-        $signingKey = hash_hmac('sha256', $requestType, $dateRegionServiceKey, true);
-
-        // Signature
-        $signature = hash_hmac('sha256', $base64Policy, $signingKey);
-        
-        // Return the post information
-        return array(
+        $cmd = $client->getCommand('PutObject', [
             'Content-Type' => $contentType,
-            'key' => $key,
-            'acl' => $acl,
-            'policy' => $base64Policy,
-            'success_action_status' => 201,
-            'X-amz-algorithm' => $algorithm,
-            'X-amz-credential' => $credentials,
-            'X-amz-date' => $date,
-            'X-amz-expires' => $expires,
-            'X-amz-signature' => $signature,
+            'Bucket' => $AWSbucket,
+            'Key'    => $key,
+            'ACL'    => $acl
+        ]);
+        $request = (string)($client->createPresignedRequest($cmd, '+20 minutes')->getUri());
+
+
+        return array(
+            'url' => $request,
+            'props' => array(
+                'Content-Type' => $contentType,
+                'key' => $key,
+                'acl' => $acl,
+            )
         );
     }
 
