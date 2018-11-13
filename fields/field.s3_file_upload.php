@@ -25,15 +25,17 @@
 			// Instantiate an S3 client
 			if (!$this->s3Client){
 
+				$credentials = new Aws\Credentials\Credentials( 
+						Symphony::Configuration()->get('access-key-id', 's3_image_upload'), 
+						Symphony::Configuration()->get('secret-access-key', 's3_image_upload')
+					);
+
 				// Instantiate an S3 client
 				$this->s3Client = new S3Client(
 					array(
 						'version' => '2006-03-01',
 						'region' =>  ($this->get('region') ? $this->get('region') :'') ,
-						'credentials' => array(
-							'key' => Symphony::Configuration()->get('access-key-id', 's3_image_upload'),
-							'secret'  => Symphony::Configuration()->get('secret-access-key', 's3_image_upload'),
-						)
+						'credentials' => $credentials,
 					)
 				);
 			}
@@ -316,13 +318,26 @@
 			}
 
 			foreach ($data['filename'] as $key => $value) {
-				$filesrc = $this->setEndpoint(
-						$this->s3Client->getObjectUrl(
-							$this->get('bucket'),  
-							$data['filepath'][$key],
-							$this->get('expires')
-						)
-					);
+
+				if ($this->get('acl') == 'private'){
+					$cmd = $this->s3Client->getCommand('GetObject', [
+					    'Bucket' => $this->get('bucket'),
+					    'Key'    => $data['filepath'][$key]
+					]);
+
+					$filesrc = (string) $this->s3Client->createPresignedRequest($cmd, $this->get('expires'))->getUri();
+
+					$filesrc = General::sanitize($filesrc);
+
+				} else {
+					$filesrc = $this->setEndpoint(
+							$this->s3Client->getObjectUrl(
+								$this->get('bucket'),  
+								$data['filepath'][$key],
+								$this->get('expires')
+							)
+						);
+				}
 
 				$file = new XMLElement('file',null,array('source'=>$filesrc,'name'=>General::sanitize($value),'mimetype'=> $data['mimetype'][$key],'filepath'=> $data['filepath'][$key]));
 				$element->appendChild($file);

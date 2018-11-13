@@ -43,7 +43,7 @@
 			$response = @$gateway->exec();
 
 			if($response === false){
-				var_dump($gateway->getInfoLast());die;
+				// var_dump($gateway->getInfoLast());die;
 				throw new Exception(sprintf('Error reading external image <code>%s</code>. Please check the URI.', $uri));
 			}
 

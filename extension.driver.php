@@ -76,7 +76,7 @@
 		}
 
 
-		public function update($previousVersion){
+		public function update($previousVersion = false){
 
 			if(version_compare($previousVersion, '1.1', '<')) {
 				$status[] = Symphony::Database()->query("
