@@ -960,7 +960,7 @@
 			}
 
 			$dimensions = new XMLElement('supported-dimensions');
-			foreach ( explode(',', $data['supported_dimensions']) as $key => $value) {
+			/*foreach ( explode(',', $data['supported_dimensions']) as $key => $value) {
 
 				$dimension = explode('x', $value);
 
@@ -996,8 +996,7 @@
 							)
 						)
 					);
-			}
-
+			}*/
 
 			//add image as cropped by user
 			$dimensions->appendChild(
@@ -1012,6 +1011,10 @@
 					),
 					array(
 						'dimension'=>'cropped',
+						'key'=>$this->filenamePrefix(
+							$data['filename'],
+							'cropped')
+						,
 						'width'=> $data['width'],
 						'height'=> $data['height']
 						)
