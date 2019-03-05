@@ -129,7 +129,7 @@
 			return $obj;
 		}
 
-		public static function load($image){
+		public static function load($image,$type = null){
 			$rgb = imagecolorat($image, 1, 1);
 			$colors = imagecolorsforindex($image, $rgb);
 
