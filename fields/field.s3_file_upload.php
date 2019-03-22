@@ -8,7 +8,7 @@
 	use Aws\S3\S3Client;
 	use Aws\S3\Exception\S3Exception;
 
-	Class fieldS3_File_Upload extends Field  implements ImportableField { //ExportableField, 
+	Class fieldS3_File_Upload extends Field  implements ImportableField { //ExportableField,
 
 		function __construct() {
 			parent::__construct();
@@ -25,8 +25,8 @@
 			// Instantiate an S3 client
 			if (!$this->s3Client){
 
-				$credentials = new Aws\Credentials\Credentials( 
-						Symphony::Configuration()->get('access-key-id', 's3_image_upload'), 
+				$credentials = new Aws\Credentials\Credentials(
+						Symphony::Configuration()->get('access-key-id', 's3_image_upload'),
 						Symphony::Configuration()->get('secret-access-key', 's3_image_upload')
 					);
 
@@ -55,7 +55,7 @@
 			return $string;
 		}
 
-		public function checkPostFieldData($data, &$message, $entry_id = null){
+		public function checkPostFieldData($data, &$message, $entry_id=NULL){
 
 			/**
 			 * For information about PHPs upload error constants see:
@@ -100,14 +100,14 @@
 			} else return $s3ObjectUrl;
 		}
 
-		public function processRawFieldData($data, &$status, &$message = null, $simulate = false, $entry_id = null){
+		public function processRawFieldData($data, &$status, &$message=NULL, $simulate=FALSE, $entry_id=NULL){
 			$status = self::__OK__;
 			// all uploads to be done via Javascript makes life simple :)
 
 			return $data;
 		}
 
-		function displaySettingsPanel(&$wrapper, $errors=NULL) {
+		function displaySettingsPanel(XMLElement &$wrapper, $errors=NULL) {
 			parent::displaySettingsPanel($wrapper, $errors);
 
 			// get current section id
@@ -155,7 +155,7 @@
 			$wrapper->appendChild($help);
 		}
 
-		function checkFields(&$errors, $checkForDuplicates=true) {
+		function checkFields(array &$errors, $checkForDuplicates=true) {
 
 			// check if min fields are integers
 
@@ -205,7 +205,7 @@
 			");
 		}
 
-		function displayPublishPanel(&$wrapper, $data=NULL, $flagWithError=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL, $entry_id) {
+		function displayPublishPanel(XMLElement &$wrapper, $data=NULL, $flagWithError=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL, $entry_id=NULL) {
 
 			$this->initializeClient();
 
@@ -265,7 +265,7 @@
 													'<div class="dz-size" data-dz-size></div>'.
 												'</div>'.
 											'</div>'.
-										'</div>' . 
+										'</div>' .
 
 										"<input name='{$fieldname}[filename][{$key}]' value='{$data['filename'][$key]}' type='hidden'/>" .
 										"<input name='{$fieldname}[filepath][{$key}]' value='{$data['filepath'][$key]}' type='hidden'/>" .
@@ -295,7 +295,7 @@
 
 		}
 
-		function prepareReadableValue($data, $entry_id){
+		function prepareReadableValue($data, $entry_id=NULL, $truncate=FALSE, $defaultValue=NULL){
 			return $this->preparePlainTextValue($data, $entry_id);
 		}
 
@@ -303,8 +303,8 @@
 			return $data['filename'];
 		}
 
-		public function appendFormattedElement(&$wrapper, $data, $encode = false) {
-			
+		public function appendFormattedElement(XMLElement &$wrapper, $data, $encode=FALSE, $mode=NULL, $entry_id=NULL) {
+
 			if (empty($data)) return;
 
 			$this->initializeClient();
@@ -332,7 +332,7 @@
 				} else {
 					$filesrc = $this->setEndpoint(
 							$this->s3Client->getObjectUrl(
-								$this->get('bucket'),  
+								$this->get('bucket'),
 								$data['filepath'][$key],
 								$this->get('expires')
 							)
@@ -373,7 +373,7 @@
 					if ($info['http_code'] != 200){
 						return null; //image does not exist
 					}
-					
+
 					$base64 = 'data:' . $info['content_type'] . ';base64,' . base64_encode($result);
 					//create new data array
 					$newData = array(

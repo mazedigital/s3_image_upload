@@ -8,7 +8,7 @@
 	use Aws\S3\S3Client;
 	use Aws\S3\Exception\S3Exception;
 
-	Class fieldS3_Image_Upload extends Field  implements ImportableField { //ExportableField, 
+	Class fieldS3_Image_Upload extends Field  implements ImportableField { //ExportableField,
 
 		const CROPPED = 0;
 		const WIDTH = 1;
@@ -60,7 +60,7 @@
 		}
 
 		private static function __parseFilter($string){
-			
+
 		}
 
 		function buildDSRetrivalSQL($data, &$joins, &$where, $andOperation=false){
@@ -388,7 +388,7 @@
 				if ($result){
 					if (empty($supportedDimensions))
 						$supportedDimensions = $dimensions;
-					else 
+					else
 						$supportedDimensions .= ',' . $dimensions;
 				}
 			}
@@ -455,7 +455,7 @@
 				if ($result){
 					if (empty($data['crop_dimensions']))
 						$data['crop_dimensions'] = $dimensions;
-					else 
+					else
 						$data['crop_dimensions'] .= ',' . $dimensions;
 				}
 			}
@@ -466,11 +466,11 @@
 
 			if ($data['image']){
 				$imgstr = $data['image'];
-	
+
 				$new_data=explode(";",$imgstr);
 				$type=$new_data[0];
 				$image_data=explode(",",$new_data[1]);
-	
+
 				$imageResource = imagecreatefromstring(base64_decode($image_data[1]));
 				// imagealphablending($imageResource, false);
 				// imagesavealpha($imageResource, true);
@@ -478,7 +478,7 @@
 				if (!in_array($type, array('data:image/gif','data:image/png','data:image/jpeg'))){
 					throw new Exception('Unsupported image type. Supported types: GIF, JPEG and PNG');
 				}
-				
+
 				// imagedestroy($imageResource);
 
 				$this->image = ResourceImage::load($imageResource,$type);
@@ -515,7 +515,7 @@
 					'supported_dimensions' => $data['crop_dimensions'],
 					'crop_position' => $data['crop_position'],
 				);
-			
+
 			return $toSave;
 		}
 
@@ -544,7 +544,7 @@
 						$filename = $result['filename'];
 					}
 				}
-					
+
 				$data = $this->processImage($data,$filename);
 
 			} else {
@@ -568,7 +568,7 @@
 					}
 				}
 
-				return $result;				
+				return $result;
 			}
 
 			if ($simulate && is_null($entry_id)) {
@@ -579,7 +579,7 @@
 			return $data;
 		}
 
-		function displaySettingsPanel(&$wrapper, $errors=NULL) {
+		function displaySettingsPanel(XMLElement &$wrapper, $errors=NULL) {
 			parent::displaySettingsPanel($wrapper, $errors);
 
 			// get current section id
@@ -657,7 +657,7 @@
 			if($this->get('crop_ui') == 'yes') {
 				$input->setAttribute('checked', 'checked');
 			}
-			
+
 			$label = Widget::Label(__('Region'));
 			$label->addClass('column');
 			$label->appendChild(Widget::Input('fields['.$this->get('sortorder').'][region]', $this->get('region')?$this->get('region'):''));
@@ -671,7 +671,7 @@
 			$wrapper->appendChild($column);
 		}
 
-		function checkFields(&$errors, $checkForDuplicates=true) {
+		function checkFields(array &$errors, $checkForDuplicates=true) {
 
 			// check if min fields are integers
 			$min_fields = array('min_width', 'min_height');
@@ -734,8 +734,8 @@
 			");
 		}
 
-		function displayPublishPanel(&$wrapper, $data=NULL, $flagWithError=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL, $entry_id) {
-			
+		function displayPublishPanel(XMLElement &$wrapper, $data=NULL, $flagWithError=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL, $entry_id=NULL) {
+
 			$this->initializeClient();
 			//TODO create error
 			// if (isset($.))
@@ -815,7 +815,7 @@
 						  "<div class='col' data-pos='crop-center crop-bottom' data-jit='8'></div>".
 						  "<div class='col' data-pos='crop-right crop-bottom' data-jit='9'></div>".
 						"</div>".
-					  "</div>".						  
+					  "</div>".
 					"</div>";
 				} else {
 					$html = null;
@@ -846,8 +846,8 @@
 				if ($data['crop_instructions']){
 					$imgsrc = $this->s3Client->getObjectUrl($this->get('bucket'),  $this->filenamePrefix($data['filename'],'cropped'));
 					$previewContent = "<div class='image-wrap pre-upload'><img src='{$imgsrc}' class='{$data['crop_position']}' data-dz-thumbnail='data-dz-thumbnail' /></div>";
-				}	
-				
+				}
+
 				$imagePreviewContainer = new XMLElement('div', $previewContent , array('class' => 'image-preview no-crop'));
 				$wrapper->appendChild($imagePreviewContainer);
 			}
@@ -872,7 +872,7 @@
 
 		}
 
-		function prepareReadableValue($data, $entry_id){
+		function prepareReadableValue($data, $entry_id=NULL, $truncate=NULL, $defaultValue=NULL){
 			return $this->preparePlainTextValue($data, $entry_id);
 		}
 
@@ -887,9 +887,9 @@
 			} else return $s3ObjectUrl;
 		}
 
-		public function appendFormattedElement(&$wrapper, $data, $encode = false) {
+		public function appendFormattedElement(XMLElement &$wrapper, $data, $encode=FALSE, $mode=NULL, $entry_id=NULL) {
 			$this->initializeClient();
-			
+
 			$element = new XMLElement($this->get('element_name'));
 
 			$dimensions = new XMLElement('supported-dimensions');
