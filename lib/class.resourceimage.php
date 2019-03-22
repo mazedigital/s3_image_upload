@@ -6,7 +6,7 @@
 
 		public function __clone(){
 			$copy = imagecreatetruecolor($this->Meta()->width, $this->Meta()->height);
-			
+
 			if($this->Meta()->type==IMAGETYPE_PNG){
 				//must be a png
 				imagealphablending($copy, false);
@@ -62,7 +62,7 @@
 				case 'jpeg':
 					$type = "data:image/jpeg";
 					break;
-				
+
 				default:
 					# code...
 					break;
@@ -76,7 +76,7 @@
 			return $image;
 		}
 
-		public static function load($imageResource,$type){
+		public static function load($imageResource,$type = false){
 			$rgb = imagecolorat($imageResource, 1, 1);
 			$colors = imagecolorsforindex($imageResource, $rgb);
 
@@ -134,7 +134,7 @@
 
 		//to be used to upload things into an S3 bucket
 		public function cropToDimensions($left,$top,$width,$height) {
-			
+
 			$src_w = $this->Meta()->width;
 			$src_h = $this->Meta()->height;
 
@@ -169,4 +169,3 @@
 		}
 
 	}
-
