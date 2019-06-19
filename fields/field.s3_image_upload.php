@@ -535,10 +535,10 @@
 			}
 
 			//filename structure = filename-timestamp.ext
-			if (!isset($filename)){
+			// if (!isset($filename)){
 				//make a 50 char handle of the original image name and append a timestamp.
 				$filename =  $this->filenamePostfix($data['imagename'],'-'.time());
-			}
+			// }
 
 			try {
 				$key_prefix = $this->get('key_prefix');
