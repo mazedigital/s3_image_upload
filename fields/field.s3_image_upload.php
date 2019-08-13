@@ -6,6 +6,7 @@
 	require_once(EXTENSIONS . '/s3_image_upload/lib/class.resourceimage.php');
 
 	use Aws\S3\S3Client;
+	use Aws\Sfn\SfnClient;
 	use Aws\S3\Exception\S3Exception;
 
 	Class fieldS3_Image_Upload extends Field  implements ImportableField { //ExportableField, 
@@ -1035,6 +1036,169 @@
 
 			$wrapper->appendChild($element);
 
+		}
+
+
+		/**
+		 * Remove the entry data of this field from the database.
+		 *
+		 * @param integer|array $entry_id
+		 *    the ID of the entry, or an array of entry ID's to delete.
+		 * @param array $data (optional)
+		 *    The entry data provided for fields to do additional cleanup
+		 *  This is an optional argument and defaults to null.
+		 * @throws DatabaseException
+		 * @return boolean
+		 *    Returns true after the cleanup has been completed
+		 */
+		public function entryDataCleanup($entry_id, $data = null)
+		{
+
+		    $s3Data = [
+		    	// 'image' => $data["filename"],
+		    	'image' => 'test.png',
+		    	'finished' => false,
+		    	'sizes' => array( 
+		    		"",
+		    		"cropped/",
+		    		"50x50/",
+			        "590x616/",
+			        "283x212/",
+			        "300x171/",
+			        "80x60/",
+			        "300x225/",
+			        "1090x480/",
+			        "940x420/",
+			        "630x300/",
+			        "466x300/",
+			        "294x221/",
+			        "303x227/",
+			        "128x79/",
+			        "1140x730/",
+			        "335x223/",
+			        "170x/",
+			        "335x/",
+			        "370x/",
+			        "675x/",
+			        "170x163/",
+			        "1140x480/",
+			        "78x78/",
+			        "775x436/",
+			        "241x136/",
+			        "720x405/",
+			        "722x543/",
+			        "140x106/",
+			        "720x/",
+			        "590x331/",
+			        "300x168/",
+			        "300x40/",
+			        "1090x420/",
+			        "750x330/",
+			        "165x160/",
+			        "1200x1200/",
+			        "1200x900/",
+			        "1200x675/"
+			    )
+
+		    ];	
+
+		    $s3ClientTest = new SfnClient(
+					array(
+						'version' => 'latest',
+						// 'region' =>  ($this->get('region') ? $this->get('region') :'') ,
+						'region' => 'eu-west-1' ,
+						'credentials' => array(
+							'key' => "AKIA2VMEAPL5FI2CZYPG",
+							'secret'  => "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",
+						)
+					)
+				);	
+
+		    // $this->s3Client
+		    $arn = 'arn:aws:states:eu-west-1:733105650426:stateMachine:DeleteImage';
+
+		    // $result = $s3ClientTest->getEndpoint($arn, $s3Data);
+
+		    $result = $s3ClientTest->startExecution([
+		        'input' => json_encode($s3Data),
+		        // 'name' => '<string>',
+		        'stateMachineArn' => $arn, // REQUIRED
+		    ]);
+		   
+
+		    // $result = $s3ClientTest->getActivityTask([
+		    // 	 'activityArn' => 'arn:aws:states:eu-west-1:733105650426:stateMachine:DeleteImage',
+		    // 	 'event' => $s3Data
+			  
+			    // 'name' => 'DeleteImage', // REQUIRED
+			    // 'roleArn' => 'arn:aws:iam::733105650426:role/service-role/s3delete', // REQUIRED
+			   //  'tags' => [
+			   //      [
+			   //          // 'image' => $data["filename"],
+			   //          'image' => 'test.png',
+						// 'sizes' => array( 
+				  //   		"cropped",
+				  //   		"50x50",
+					 //        "590x616",
+					 //        "283x212",
+					 //        "300x171",
+					 //        "80x60",
+					 //        "300x225",
+					 //        "1090x480",
+					 //        "940x420",
+					 //        "630x300",
+					 //        "466x300",
+					 //        "294x221",
+					 //        "303x227",
+					 //        "128x79",
+					 //        "1140x730",
+					 //        "335x223",
+					 //        "170x",
+					 //        "335x",
+					 //        "370x",
+					 //        "675x",
+					 //        "170x163",
+					 //        "1140x480",
+					 //        "78x78",
+					 //        "775x436",
+					 //        "241x136",
+					 //        "720x405",
+					 //        "722x543",
+					 //        "140x106",
+					 //        "720x",
+					 //        "590x331",
+					 //        "300x168",
+					 //        "300x40",
+					 //        "1090x420",
+					 //        "750x330",
+					 //        "165x160",
+					 //        "1200x1200",
+					 //        "1200x900",
+					 //        "1200x675"
+			   //  		)
+			   //      ],			      
+			   //  ],
+			// ]);
+
+		    var_dump( $result);die;	
+
+
+		    // find images from all entry ids in array (if not integer)
+		    	// delete original
+		
+
+			// for each size (list needed) see if image exists, if yes delete
+			// call lambda function or step function for each image 
+			// process delete images in lambda
+
+		    return parent::entryDataCleanup($entry_id, $data);
+
+		    // $where = is_array($entry_id)
+		    //     ? " `entry_id` IN (" . implode(',', $entry_id) . ") "
+		    //     : " `entry_id` = '$entry_id' ";
+
+		    // Symphony::Database()->delete('tbl_entries_data_' . $this->get('id'), $where);
+		    // return true;
 		}
 
 		/*-------------------------------------------------------------------------
