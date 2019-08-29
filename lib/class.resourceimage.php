@@ -53,14 +53,14 @@
 			$type = "";
 			switch ($extension) {
 				case 'gif':
-					$type = "data:image/gif";
+					$type = "image/gif";
 					break;
 				case 'png':
-					$type = "data:image/png";
+					$type = "image/png";
 					break;
 				case 'jpg':
 				case 'jpeg':
-					$type = "data:image/jpeg";
+					$type = "image/jpeg";
 					break;
 
 				default:
@@ -88,13 +88,13 @@
 
 			switch($type) {
 				// GIF
-				case 'data:image/gif':
+				case 'image/gif':
 					// imagegif($imageResource);
 					$meta['type'] = IMAGETYPE_GIF;
 					break;
 
 				// JPEG
-				case 'data:image/jpeg':
+				case 'image/jpeg':
 					if($meta['channels'] <= 3 || ($meta['channels'] == 4 && $colors['alpha'] == null )){
 						// imagejpeg($imageResource);
 						$meta['type'] = IMAGETYPE_JPEG;
@@ -106,7 +106,7 @@
 					break;
 
 				// PNG
-				case 'data:image/png':
+				case 'image/png':
 					$meta['type'] = IMAGETYPE_PNG;
 					imagealphablending($imageResource, false);
 					imagesavealpha($imageResource, true);

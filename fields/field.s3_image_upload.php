@@ -8,6 +8,30 @@
 	use Aws\S3\S3Client;
 	use Aws\S3\Exception\S3Exception;
 
+	function imagecreatefromfile( $path, $filename, $meta ) {
+		if (!file_exists($path)) {
+			throw new InvalidArgumentException('File "'.$filename.'" not found.');
+		}
+		switch ( strtolower( pathinfo( $filename, PATHINFO_EXTENSION ))) {
+			case 'jpeg':
+			case 'jpg':
+				return imagecreatefromjpeg($path);
+			break;
+	
+			case 'png':
+				return imagecreatefrompng($path);
+			break;
+	
+			case 'gif':
+				return imagecreatefromgif($path);
+			break;
+	
+			default:
+				throw new InvalidArgumentException('File "'.$filename.'" is not valid jpg, png or gif image.');
+			break;
+		}
+	}
+
 	Class fieldS3_Image_Upload extends Field  implements ImportableField { //ExportableField,
 
 		const CROPPED = 0;
@@ -158,11 +182,16 @@
 			//fetch original image data
 			if (!empty($data['image'])){
 				$imgstr = $data['image'];
-				$new_data=explode(";",$imgstr);
-				$type=$new_data[0];
-				$image_data=explode(",",$new_data[1]);
+				if (is_string($imgstr)){
+					$new_data=explode(";",$imgstr);
+					$type=$new_data[0];
+					$image_data=explode(",",$new_data[1]);
 
-				$imageResource = imagecreatefromstring(base64_decode($image_data[1]));
+					$imageResource = imagecreatefromstring(base64_decode($image_data[1]));
+				} else {
+
+					$imageResource = imagecreatefromfile($imgstr['tmp_name'],$imgstr['name'],$imgstr['type']);
+				}
 
 				if (!is_numeric($data['width'])){
 					$data['width'] = 100;
@@ -467,15 +496,30 @@
 			if ($data['image']){
 				$imgstr = $data['image'];
 
-				$new_data=explode(";",$imgstr);
-				$type=$new_data[0];
-				$image_data=explode(",",$new_data[1]);
 
-				$imageResource = imagecreatefromstring(base64_decode($image_data[1]));
+				if (is_string($imgstr)){
+					$new_data=explode(";",$imgstr);
+					$type=$new_data[0];
+					$image_data=str_replace('data:','',explode(",",$new_data[1]));
+
+					$imageResource = imagecreatefromstring(base64_decode($image_data[1]));
+				} else {
+
+					$imageResource = imagecreatefromfile($imgstr['tmp_name'],$imgstr['name'],$imgstr['type']);
+
+					$type=$imgstr['type'];
+				}
+
+
+				// $new_data=explode(";",$imgstr);
+				// $type=$new_data[0];
+				// $image_data=explode(",",$new_data[1]);
+
+				// $imageResource = imagecreatefromstring(base64_decode($image_data[1]));
 				// imagealphablending($imageResource, false);
 				// imagesavealpha($imageResource, true);
 
-				if (!in_array($type, array('data:image/gif','data:image/png','data:image/jpeg'))){
+				if (!in_array($type, array('image/gif','image/png','image/jpeg'))){
 					throw new Exception('Unsupported image type. Supported types: GIF, JPEG and PNG');
 				}
 
